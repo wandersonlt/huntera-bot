@@ -1,4 +1,5 @@
 // data/items.js - Lista COMPLETA de itens do Tibia/Huntera
+
 // ============================================================
 // ARMAS
 // ============================================================
@@ -77,20 +78,6 @@ const ARMAS = [
   'Bastão do Sol', 'Bastão da Lua', 'Bastão das Estrelas',
   'Bastão do Vento', 'Bastão da Tempestade', 'Bastão do Trovão',
   
-  // Cetros
-  'Cetro', 'Cetro de Ferro', 'Cetro de Aço',
-  'Cetro de Mithril', 'Cetro de Dragão', 'Cetro de Cristal',
-  'Cetro de Fogo', 'Cetro de Gelo', 'Cetro de Energia',
-  'Cetro de Luz', 'Cetro de Sombra', 'Cetro de Veneno',
-  'Cetro de Sangue', 'Cetro de Guerra', 'Cetro do Caos',
-  'Cetro do Herói', 'Cetro do Lendário', 'Cetro do Cavaleiro',
-  'Cetro do Paladino', 'Cetro do Guerreiro', 'Cetro do Guardião',
-  'Cetro do Dragão', 'Cetro do Demonio', 'Cetro do Anjo',
-  'Cetro do Rei', 'Cetro do Trono', 'Cetro do Destino',
-  'Cetro da Alvorada', 'Cetro do Crepúsculo', 'Cetro da Meia-Noite',
-  'Cetro do Sol', 'Cetro da Lua', 'Cetro das Estrelas',
-  'Cetro do Vento', 'Cetro da Tempestade', 'Cetro do Trovão',
-  
   // Adagas
   'Adaga', 'Adaga de Ferro', 'Adaga de Aço',
   'Adaga de Mithril', 'Adaga de Dragão', 'Adaga de Cristal',
@@ -105,7 +92,6 @@ const ARMAS = [
   'Adaga do Sol', 'Adaga da Lua', 'Adaga das Estrelas',
   'Adaga do Vento', 'Adaga da Tempestade', 'Adaga do Trovão',
   'Adaga do Assassino', 'Adaga do Ladrão', 'Adaga do Espião',
-  'Adaga do Agente', 'Adaga do Mercenário', 'Adaga do Bárbaro',
   
   // Lanças
   'Lança', 'Lança de Ferro', 'Lança de Aço',
@@ -118,75 +104,38 @@ const ARMAS = [
   'Lança do Dragão', 'Lança do Demonio', 'Lança do Anjo',
   'Lança do Rei', 'Lança do Trono', 'Lança do Destino',
   'Lança da Alvorada', 'Lança do Crepúsculo', 'Lança da Meia-Noite',
-  'Lança do Sol', 'Lança da Lua', 'Lança das Estrelas',
-  'Lança do Vento', 'Lança da Tempestade', 'Lança do Trovão',
   'Tridente', 'Tridente de Ferro', 'Tridente de Aço',
   'Tridente de Mithril', 'Tridente de Dragão', 'Tridente de Cristal',
-  'Tridente de Fogo', 'Tridente de Gelo', 'Tridente de Energia',
-  'Tridente de Guerra', 'Tridente do Caos', 'Tridente do Herói',
   
-  // Maças
+  // Maças e Martelos
   'Maça', 'Maça de Ferro', 'Maça de Aço',
   'Maça de Mithril', 'Maça de Dragão', 'Maça de Cristal',
   'Maça de Fogo', 'Maça de Gelo', 'Maça de Energia',
-  'Maça de Luz', 'Maça de Sombra', 'Maça de Veneno',
-  'Maça de Sangue', 'Maça de Guerra', 'Maça do Caos',
-  'Maça do Herói', 'Maça do Lendário', 'Maça do Cavaleiro',
-  'Maça do Paladino', 'Maça do Guerreiro', 'Maça do Guardião',
-  'Maça do Dragão', 'Maça do Demonio', 'Maça do Anjo',
-  'Maça do Rei', 'Maça do Trono', 'Maça do Destino',
-  'Maça da Alvorada', 'Maça do Crepúsculo', 'Maça da Meia-Noite',
-  
-  // Martelos
+  'Maça de Guerra', 'Maça do Caos', 'Maça do Herói',
   'Martelo', 'Martelo de Ferro', 'Martelo de Aço',
   'Martelo de Mithril', 'Martelo de Dragão', 'Martelo de Cristal',
   'Martelo de Fogo', 'Martelo de Gelo', 'Martelo de Energia',
-  'Martelo de Luz', 'Martelo de Sombra', 'Martelo de Veneno',
-  'Martelo de Sangue', 'Martelo de Guerra', 'Martelo do Caos',
-  'Martelo do Herói', 'Martelo do Lendário', 'Martelo do Cavaleiro',
-  'Martelo do Paladino', 'Martelo do Guerreiro', 'Martelo do Guardião',
-  'Martelo do Dragão', 'Martelo do Demonio', 'Martelo do Anjo',
-  'Martelo do Rei', 'Martelo do Trono', 'Martelo do Destino',
-  'Martelo da Alvorada', 'Martelo do Crepúsculo', 'Martelo da Meia-Noite',
-  'Martelo do Sol', 'Martelo da Lua', 'Martelo das Estrelas',
-  'Martelo do Vento', 'Martelo da Tempestade', 'Martelo do Trovão',
+  'Martelo de Guerra', 'Martelo do Caos', 'Martelo do Herói',
+  'Martelo do Lendário', 'Martelo do Cavaleiro', 'Martelo do Paladino',
   
-  // Clavas
+  // Cajados e Clavas
+  'Cajado', 'Cajado de Ferro', 'Cajado de Aço',
+  'Cajado de Mithril', 'Cajado de Dragão', 'Cajado de Cristal',
+  'Cajado de Fogo', 'Cajado de Gelo', 'Cajado de Energia',
+  'Cajado de Luz', 'Cajado de Sombra', 'Cajado de Guerra',
+  'Cajado do Caos', 'Cajado do Herói', 'Cajado do Mago',
   'Clava', 'Clava de Ferro', 'Clava de Aço',
   'Clava de Mithril', 'Clava de Dragão', 'Clava de Cristal',
   'Clava de Fogo', 'Clava de Gelo', 'Clava de Energia',
   'Clava de Guerra', 'Clava do Caos', 'Clava do Herói',
-  'Clava do Lendário', 'Clava do Cavaleiro', 'Clava do Paladino',
-  'Clava do Guerreiro', 'Clava do Guardião', 'Clava do Dragão',
-  'Clava do Demonio', 'Clava do Anjo', 'Clava do Rei',
-  'Clava do Trono', 'Clava do Destino', 'Clava da Alvorada',
   
-  // Cajados
-  'Cajado', 'Cajado de Ferro', 'Cajado de Aço',
-  'Cajado de Mithril', 'Cajado de Dragão', 'Cajado de Cristal',
-  'Cajado de Fogo', 'Cajado de Gelo', 'Cajado de Energia',
-  'Cajado de Luz', 'Cajado de Sombra', 'Cajado de Veneno',
-  'Cajado de Sangue', 'Cajado de Guerra', 'Cajado do Caos',
-  'Cajado do Herói', 'Cajado do Lendário', 'Cajado do Cavaleiro',
-  'Cajado do Paladino', 'Cajado do Guerreiro', 'Cajado do Guardião',
-  'Cajado do Dragão', 'Cajado do Demonio', 'Cajado do Anjo',
-  'Cajado do Rei', 'Cajado do Trono', 'Cajado do Destino',
-  'Cajado da Alvorada', 'Cajado do Crepúsculo', 'Cajado da Meia-Noite',
-  'Cajado do Sol', 'Cajado da Lua', 'Cajado das Estrelas',
-  'Cajado do Mago', 'Cajado do Arcano', 'Cajado do Elemental',
-  'Cajado do Caos', 'Cajado do Vento', 'Cajado da Tempestade',
-  
-  // Facas
-  'Faca', 'Faca de Caça', 'Faca de Sobrevivência',
-  'Faca de Ferro', 'Faca de Aço', 'Faca de Mithril',
-  'Faca de Dragão', 'Faca de Cristal', 'Faca de Fogo',
-  'Faca de Gelo', 'Faca de Energia', 'Faca de Veneno',
-  'Faca de Sangue', 'Faca de Guerra', 'Faca do Caos',
-  'Faca do Herói', 'Faca do Lendário', 'Faca do Assassino',
-  'Faca do Ladrão', 'Faca do Espião', 'Faca do Agente',
-  'Faca do Mercenário', 'Faca do Bárbaro', 'Faca do Guerreiro',
-  'Canivete', 'Canivete de Ferro', 'Canivete de Aço',
-  'Canivete de Mithril', 'Canivete de Dragão', 'Canivete de Cristal',
+  // Cetros
+  'Cetro', 'Cetro de Ferro', 'Cetro de Aço',
+  'Cetro de Mithril', 'Cetro de Dragão', 'Cetro de Cristal',
+  'Cetro de Fogo', 'Cetro de Gelo', 'Cetro de Energia',
+  'Cetro de Luz', 'Cetro de Sombra', 'Cetro de Guerra',
+  'Cetro do Caos', 'Cetro do Herói', 'Cetro do Lendário',
+  'Cetro do Cavaleiro', 'Cetro do Paladino', 'Cetro do Guerreiro',
 ];
 
 // ============================================================
@@ -201,31 +150,22 @@ const ESCUDOS = [
   'Escudo de Batalha', 'Escudo de Guerra', 'Escudo do Guardião',
   'Escudo do Cavaleiro', 'Escudo do Paladino', 'Escudo do Guerreiro',
   'Escudo do Herói', 'Escudo do Lendário', 'Escudo do Rei',
-  'Escudo do Trono', 'Escudo do Destino', 'Escudo da Alvorada',
-  'Escudo do Crepúsculo', 'Escudo da Meia-Noite', 'Escudo do Sol',
-  'Escudo da Lua', 'Escudo das Estrelas', 'Escudo do Vento',
-  'Escudo da Tempestade', 'Escudo do Trovão', 'Escudo do Relâmpago',
   'Broquel', 'Broquel de Ferro', 'Broquel de Aço',
   'Broquel de Mithril', 'Broquel de Dragão', 'Broquel de Cristal',
   'Broquel de Fogo', 'Broquel de Gelo', 'Broquel de Energia',
   'Broquel de Guerra', 'Broquel do Caos', 'Broquel do Herói',
-  'Broquel do Lendário', 'Broquel do Cavaleiro', 'Broquel do Paladino',
   'Targe', 'Targe de Ferro', 'Targe de Aço',
   'Targe de Mithril', 'Targe de Dragão', 'Targe de Cristal',
   'Targe de Fogo', 'Targe de Gelo', 'Targe de Energia',
   'Targe de Guerra', 'Targe do Caos', 'Targe do Herói',
-  'Targe do Lendário', 'Targe do Cavaleiro', 'Targe do Paladino',
   'Escudo do Demonio', 'Escudo do Anjo', 'Escudo do Caos',
   'Escudo da Justiça', 'Escudo da Proteção', 'Escudo da Defesa',
-  'Escudo do Escudo', 'Escudo do Guarda', 'Escudo do Sentinela',
-  'Escudo do Vigia', 'Escudo do Protetor', 'Escudo do Defensor',
 ];
 
 // ============================================================
 // ARMADURAS
 // ============================================================
 const ARMADURAS = [
-  // Armaduras
   'Armadura de Couro', 'Armadura de Bronze', 'Armadura de Ferro',
   'Armadura de Aço', 'Armadura de Mithril', 'Armadura de Dragão',
   'Armadura de Cristal', 'Armadura de Fogo', 'Armadura de Gelo',
@@ -236,46 +176,19 @@ const ARMADURAS = [
   'Armadura do Lendário', 'Armadura do Dragão', 'Armadura do Demonio',
   'Armadura do Anjo', 'Armadura do Rei', 'Armadura do Trono',
   'Armadura do Destino', 'Armadura da Alvorada', 'Armadura do Crepúsculo',
-  'Armadura da Meia-Noite', 'Armadura do Sol', 'Armadura da Lua',
-  'Armadura das Estrelas', 'Armadura do Vento', 'Armadura da Tempestade',
-  'Armadura do Trovão', 'Armadura do Relâmpago', 'Armadura do Oceano',
-  'Armadura do Deserto', 'Armadura da Floresta', 'Armadura das Montanhas',
-  'Armadura do Caos', 'Armadura da Justiça', 'Armadura da Proteção',
-  'Armadura do Guarda', 'Armadura do Sentinela', 'Armadura do Vigia',
-  'Armadura do Protetor', 'Armadura do Defensor', 'Armadura do Escudo',
-  
-  // Túnicas
   'Túnica', 'Túnica de Seda', 'Túnica de Mago',
   'Túnica de Ferro', 'Túnica de Aço', 'Túnica de Mithril',
   'Túnica de Dragão', 'Túnica de Cristal', 'Túnica de Fogo',
   'Túnica de Gelo', 'Túnica de Energia', 'Túnica de Luz',
   'Túnica de Sombra', 'Túnica de Veneno', 'Túnica de Sangue',
   'Túnica do Arcano', 'Túnica do Elemental', 'Túnica do Caos',
-  'Túnica do Mago', 'Túnica do Feiticeiro', 'Túnica do Bruxo',
-  'Túnica do Sábio', 'Túnica do Erudito', 'Túnica do Estudioso',
-  'Túnica do Aprendiz', 'Túnica do Mestre', 'Túnica do Grão-Mestre',
-  'Túnica do Arcanista', 'Túnica do Conjurador', 'Túnica do Invocador',
-  'Túnica do Ilusionista', 'Túnica do Encantador', 'Túnica do Transmutador',
-  
-  // Cotas de Malha
   'Cota de Malha', 'Cota de Malha de Ferro', 'Cota de Malha de Aço',
   'Cota de Malha de Mithril', 'Cota de Malha de Dragão', 'Cota de Malha de Cristal',
   'Cota de Malha de Fogo', 'Cota de Malha de Gelo', 'Cota de Malha de Energia',
   'Cota de Malha de Luz', 'Cota de Malha de Sombra', 'Cota de Malha de Veneno',
   'Cota de Malha de Sangue', 'Cota de Malha de Batalha', 'Cota de Malha de Guerra',
-  'Cota de Malha do Cavaleiro', 'Cota de Malha do Guerreiro', 'Cota de Malha do Paladino',
-  'Cota de Malha do Guardião', 'Cota de Malha do Herói', 'Cota de Malha do Lendário',
-  'Cota de Malha do Dragão', 'Cota de Malha do Demonio', 'Cota de Malha do Anjo',
-  'Cota de Malha do Rei', 'Cota de Malha do Trono', 'Cota de Malha do Destino',
-  
-  // Peitorais
   'Peitoral de Couro', 'Peitoral de Bronze', 'Peitoral de Ferro',
   'Peitoral de Aço', 'Peitoral de Mithril', 'Peitoral de Dragão',
-  'Peitoral de Cristal', 'Peitoral de Fogo', 'Peitoral de Gelo',
-  'Peitoral de Energia', 'Peitoral de Luz', 'Peitoral de Sombra',
-  'Peitoral de Veneno', 'Peitoral de Sangue', 'Peitoral de Batalha',
-  'Peitoral de Guerra', 'Peitoral do Cavaleiro', 'Peitoral do Guerreiro',
-  'Peitoral do Paladino', 'Peitoral do Guardião', 'Peitoral do Herói',
 ];
 
 // ============================================================
@@ -291,31 +204,16 @@ const CAPACETES = [
   'Capacete do Paladino', 'Capacete do Guardião', 'Capacete do Herói',
   'Capacete do Lendário', 'Capacete do Dragão', 'Capacete do Demonio',
   'Capacete do Anjo', 'Capacete do Rei', 'Capacete do Trono',
-  'Capacete do Destino', 'Capacete da Alvorada', 'Capacete do Crepúsculo',
-  'Capacete da Meia-Noite', 'Capacete do Sol', 'Capacete da Lua',
-  'Capacete das Estrelas', 'Capacete do Vento', 'Capacete da Tempestade',
-  'Capacete do Trovão', 'Capacete do Relâmpago', 'Capacete do Oceano',
-  'Capacete do Deserto', 'Capacete da Floresta', 'Capacete das Montanhas',
-  'Capacete do Caos', 'Capacete da Justiça', 'Capacete da Proteção',
   'Chapéu', 'Chapéu de Couro', 'Chapéu de Mago',
   'Chapéu de Seda', 'Chapéu de Arcano', 'Chapéu do Elemental',
   'Chapéu do Caos', 'Chapéu do Mago', 'Chapéu do Feiticeiro',
-  'Chapéu do Bruxo', 'Chapéu do Sábio', 'Chapéu do Erudito',
-  'Chapéu do Estudioso', 'Chapéu do Aprendiz', 'Chapéu do Mestre',
   'Capuz', 'Capuz de Couro', 'Capuz de Seda',
   'Capuz de Mago', 'Capuz do Arcano', 'Capuz do Elemental',
   'Capuz do Caos', 'Capuz de Sombra', 'Capuz de Luz',
-  'Capuz de Energia', 'Capuz de Fogo', 'Capuz de Gelo',
-  'Capuz de Veneno', 'Capuz de Sangue', 'Capuz do Assassino',
-  'Capuz do Ladrão', 'Capuz do Espião', 'Capuz do Agente',
-  'Capuz do Mercenário', 'Capuz do Bárbaro', 'Capuz do Guerreiro',
   'Elmo', 'Elmo de Ferro', 'Elmo de Aço',
   'Elmo de Mithril', 'Elmo de Dragão', 'Elmo de Cristal',
   'Elmo de Fogo', 'Elmo de Gelo', 'Elmo de Energia',
   'Elmo de Batalha', 'Elmo de Guerra', 'Elmo do Cavaleiro',
-  'Elmo do Guerreiro', 'Elmo do Paladino', 'Elmo do Guardião',
-  'Elmo do Herói', 'Elmo do Lendário', 'Elmo do Rei',
-  'Elmo do Trono', 'Elmo do Destino', 'Elmo da Alvorada',
 ];
 
 // ============================================================
@@ -332,22 +230,13 @@ const BOTAS = [
   'Botas do Guardião', 'Botas do Herói', 'Botas do Lendário',
   'Botas do Dragão', 'Botas do Demonio', 'Botas do Anjo',
   'Botas do Rei', 'Botas do Trono', 'Botas do Destino',
-  'Botas da Alvorada', 'Botas do Crepúsculo', 'Botas da Meia-Noite',
-  'Botas do Sol', 'Botas da Lua', 'Botas das Estrelas',
-  'Botas do Vento', 'Botas da Tempestade', 'Botas do Trovão',
-  'Botas do Relâmpago', 'Botas do Oceano', 'Botas do Deserto',
-  'Botas da Floresta', 'Botas das Montanhas', 'Botas do Caos',
   'Botas de Salto', 'Botas de Escalada', 'Botas de Caminhada',
   'Botas do Mago', 'Botas do Arcano', 'Botas do Elemental',
-  'Botas do Caos', 'Botas de Seda', 'Botas de Couro Fino',
   'Botas do Assassino', 'Botas do Ladrão', 'Botas do Espião',
-  'Botas do Agente', 'Botas do Mercenário', 'Botas do Bárbaro',
   'Botas do Guerreiro', 'Botas do Cavaleiro', 'Botas do Paladino',
   'Botas do Guardião', 'Botas do Sentinela', 'Botas do Vigia',
-  'Botas do Protetor', 'Botas do Defensor', 'Botas do Escudo',
   'Botas de Plumas', 'Botas de Vento', 'Botas de Leveza',
   'Botas de Rapidez', 'Botas de Agilidade', 'Botas de Destreza',
-  'Botas de Reflexos', 'Botas de Equilíbrio', 'Botas de Harmonia',
 ];
 
 // ============================================================
@@ -368,21 +257,11 @@ const ANEIS = [
   'Anel de Cristal', 'Anel de Safira', 'Anel de Rubi',
   'Anel de Esmeralda', 'Anel de Ametista', 'Anel de Topázio',
   'Anel de Ônix', 'Anel de Jade', 'Anel de Âmbar',
-  'Anel de Pérola', 'Anel de Coral', 'Anel de Marfim',
   'Anel do Dragão', 'Anel do Demonio', 'Anel do Anjo',
   'Anel do Rei', 'Anel do Trono', 'Anel do Destino',
   'Anel da Alvorada', 'Anel do Crepúsculo', 'Anel da Meia-Noite',
   'Anel do Sol', 'Anel da Lua', 'Anel das Estrelas',
   'Anel do Vento', 'Anel da Tempestade', 'Anel do Trovão',
-  'Anel do Relâmpago', 'Anel do Oceano', 'Anel do Deserto',
-  'Anel da Floresta', 'Anel das Montanhas', 'Anel do Caos',
-  'Anel da Justiça', 'Anel da Proteção', 'Anel da Defesa',
-  'Anel do Escudo', 'Anel do Guarda', 'Anel do Sentinela',
-  'Anel do Vigia', 'Anel do Protetor', 'Anel do Defensor',
-  'Anel do Assassino', 'Anel do Ladrão', 'Anel do Espião',
-  'Anel do Agente', 'Anel do Mercenário', 'Anel do Bárbaro',
-  'Anel de Poder Superior', 'Anel de Força Suprema', 'Anel de Vida Eterna',
-  'Anel de Mana Infinita', 'Anel de Regeneração Suprema', 'Anel de Proteção Total',
 ];
 
 // ============================================================
@@ -402,69 +281,40 @@ const AMULETOS = [
   'Amuleto de Diamante', 'Amuleto de Safira', 'Amuleto de Rubi',
   'Amuleto de Esmeralda', 'Amuleto de Ametista', 'Amuleto de Topázio',
   'Amuleto de Ônix', 'Amuleto de Jade', 'Amuleto de Âmbar',
-  'Amuleto de Pérola', 'Amuleto de Coral', 'Amuleto de Marfim',
   'Amuleto do Dragão', 'Amuleto do Demonio', 'Amuleto do Anjo',
   'Amuleto do Rei', 'Amuleto do Trono', 'Amuleto do Destino',
   'Amuleto da Alvorada', 'Amuleto do Crepúsculo', 'Amuleto da Meia-Noite',
   'Amuleto do Sol', 'Amuleto da Lua', 'Amuleto das Estrelas',
   'Amuleto do Vento', 'Amuleto da Tempestade', 'Amuleto do Trovão',
-  'Amuleto do Relâmpago', 'Amuleto do Oceano', 'Amuleto do Deserto',
-  'Amuleto da Floresta', 'Amuleto das Montanhas', 'Amuleto do Caos',
-  'Amuleto da Justiça', 'Amuleto da Proteção', 'Amuleto da Defesa',
-  'Amuleto do Escudo', 'Amuleto do Guarda', 'Amuleto do Sentinela',
-  'Amuleto do Vigia', 'Amuleto do Protetor', 'Amuleto do Defensor',
-  'Amuleto do Assassino', 'Amuleto do Ladrão', 'Amuleto do Espião',
-  'Amuleto do Agente', 'Amuleto do Mercenário', 'Amuleto do Bárbaro',
   'Amuleto de Poder Superior', 'Amuleto de Proteção Total', 'Amuleto de Vida Eterna',
-  'Amuleto de Mana Infinita', 'Amuleto de Regeneração Suprema', 'Amuleto de Força Divina',
 ];
 
 // ============================================================
 // POÇÕES
 // ============================================================
 const POCOES = [
-  // Poções de Vida
   'Poção de Vida Pequena', 'Poção de Vida Média', 'Poção de Vida Grande',
   'Poção de Vida Extrema', 'Poção de Vida Suprema', 'Poção de Vida Perfeita',
   'Poção de Vida Renovadora', 'Poção de Vida Forte', 'Poção de Vida Poderosa',
-  'Poção de Vida Mágica', 'Poção de Vida Divina', 'Poção de Vida Eterna',
-  'Poção de Vida Suprema +', 'Poção de Vida Perfeita +', 'Poção de Vida Renovadora +',
-  
-  // Poções de Mana
   'Poção de Mana Pequena', 'Poção de Mana Média', 'Poção de Mana Grande',
   'Poção de Mana Extrema', 'Poção de Mana Suprema', 'Poção de Mana Perfeita',
   'Poção de Mana Renovadora', 'Poção de Mana Forte', 'Poção de Mana Poderosa',
-  'Poção de Mana Mágica', 'Poção de Mana Divina', 'Poção de Mana Eterna',
-  'Poção de Mana Suprema +', 'Poção de Mana Perfeita +', 'Poção de Mana Renovadora +',
-  
-  // Poções de Energia
-  'Poção de Energia', 'Poção de Energia Pequena', 'Poção de Energia Média',
-  'Poção de Energia Grande', 'Poção de Energia Extrema', 'Poção de Energia Suprema',
-  'Poção de Energia Forte', 'Poção de Energia Poderosa', 'Poção de Energia Mágica',
-  
-  // Poções de Atributos
-  'Poção de Força', 'Poção de Inteligência', 'Poção de Destreza',
-  'Poção de Agilidade', 'Poção de Velocidade', 'Poção de Resistência',
+  'Poção de Energia', 'Poção de Força', 'Poção de Inteligência',
+  'Poção de Destreza', 'Poção de Agilidade', 'Poção de Velocidade',
+  'Poção de Regeneração', 'Poção de Invisibilidade', 'Poção de Resistência',
   'Poção de Vitalidade', 'Poção de Poder', 'Poção de Sabedoria',
   'Poção de Proteção', 'Poção de Defesa', 'Poção de Ataque',
-  
-  // Poções de Regeneração
-  'Poção de Regeneração', 'Poção de Regeneração Pequena', 'Poção de Regeneração Média',
-  'Poção de Regeneração Grande', 'Poção de Regeneração Extrema', 'Poção de Regeneração Suprema',
-  'Poção de Regeneração Forte', 'Poção de Regeneração Poderosa', 'Poção de Regeneração Mágica',
-  
-  // Poções Especiais
-  'Poção de Invisibilidade', 'Poção de Cura', 'Poção de Restauração',
-  'Poção de Fogo', 'Poção de Gelo', 'Poção de Luz',
-  'Poção de Sombra', 'Poção de Veneno', 'Poção de Sangue',
-  'Poção de Guerra', 'Poção de Batalha', 'Poção do Herói',
-  'Poção do Lendário', 'Poção do Mago', 'Poção do Arcano',
-  'Poção do Elemental', 'Poção do Caos', 'Poção de Transformação',
-  'Poção de Metamorfose', 'Poção de Ilusão', 'Poção de Fantasma',
-  'Poção de Voo', 'Poção de Respiração', 'Poção de Visão',
-  'Poção de Escuridão', 'Poção de Luz Divina', 'Poção de Sombra Eterna',
-  'Poção de Fogo Infernal', 'Poção de Gelo Eterno', 'Poção de Energia Pura',
-  'Poção de Veneno Mortal', 'Poção de Sangue do Dragão', 'Poção de Poder Supremo',
+  'Poção de Cura', 'Poção de Restauração', 'Poção de Fogo',
+  'Poção de Gelo', 'Poção de Luz', 'Poção de Sombra',
+  'Poção de Veneno', 'Poção de Sangue', 'Poção de Guerra',
+  'Poção de Batalha', 'Poção do Herói', 'Poção do Lendário',
+  'Poção do Mago', 'Poção do Arcano', 'Poção do Elemental',
+  'Poção do Caos', 'Poção de Transformação', 'Poção de Metamorfose',
+  'Poção de Ilusão', 'Poção de Fantasma', 'Poção de Voo',
+  'Poção de Respiração', 'Poção de Visão', 'Poção de Escuridão',
+  'Poção de Luz Divina', 'Poção de Sombra Eterna', 'Poção de Fogo Infernal',
+  'Poção de Gelo Eterno', 'Poção de Energia Pura', 'Poção de Veneno Mortal',
+  'Poção de Sangue do Dragão', 'Poção de Poder Supremo',
 ];
 
 // ============================================================
@@ -487,10 +337,6 @@ const RUNAS = [
   'Runa de Proteção Grande', 'Runa de Poder Grande', 'Runa de Vida Grande',
   'Runa de Mana Grande', 'Runa de Força Grande', 'Runa de Destreza Grande',
   'Runa de Fogo Suprema', 'Runa de Gelo Suprema', 'Runa de Energia Suprema',
-  'Runa de Terra Suprema', 'Runa de Vento Suprema', 'Runa de Luz Suprema',
-  'Runa de Sombra Suprema', 'Runa de Explosão Suprema', 'Runa de Cura Suprema',
-  'Runa de Proteção Suprema', 'Runa de Poder Supremo', 'Runa de Vida Suprema',
-  'Runa de Mana Suprema', 'Runa de Força Suprema', 'Runa de Destreza Suprema',
   'Runa do Dragão', 'Runa do Demonio', 'Runa do Anjo',
   'Runa do Rei', 'Runa do Trono', 'Runa do Destino',
   'Runa da Alvorada', 'Runa do Crepúsculo', 'Runa da Meia-Noite',
@@ -504,7 +350,6 @@ const RUNAS = [
 // MUNIÇÃO
 // ============================================================
 const MUNICAO = [
-  // Flechas
   'Flecha', 'Flecha de Ferro', 'Flecha de Aço',
   'Flecha de Mithril', 'Flecha de Dragão', 'Flecha de Cristal',
   'Flecha de Fogo', 'Flecha de Gelo', 'Flecha de Energia',
@@ -513,13 +358,9 @@ const MUNICAO = [
   'Flecha do Herói', 'Flecha do Lendário', 'Flecha do Paladino',
   'Flecha de Fogo Grande', 'Flecha de Gelo Grande', 'Flecha de Energia Grande',
   'Flecha de Luz Grande', 'Flecha de Sombra Grande', 'Flecha de Veneno Grande',
-  'Flecha de Fogo Suprema', 'Flecha de Gelo Suprema', 'Flecha de Energia Suprema',
-  'Flecha de Luz Suprema', 'Flecha de Sombra Suprema', 'Flecha de Veneno Suprema',
   'Flecha do Dragão', 'Flecha do Demonio', 'Flecha do Anjo',
   'Flecha do Caos', 'Flecha da Tempestade', 'Flecha do Trovão',
   'Flecha do Relâmpago', 'Flecha do Vento', 'Flecha do Oceano',
-  
-  // Bolts
   'Bolt', 'Bolt de Ferro', 'Bolt de Aço',
   'Bolt de Mithril', 'Bolt de Dragão', 'Bolt de Cristal',
   'Bolt de Fogo', 'Bolt de Gelo', 'Bolt de Energia',
@@ -527,12 +368,8 @@ const MUNICAO = [
   'Bolt de Sangue', 'Bolt de Guerra', 'Bolt de Batalha',
   'Bolt do Herói', 'Bolt do Lendário', 'Bolt do Paladino',
   'Bolt de Fogo Grande', 'Bolt de Gelo Grande', 'Bolt de Energia Grande',
-  'Bolt de Luz Grande', 'Bolt de Sombra Grande', 'Bolt de Veneno Grande',
-  'Bolt de Fogo Suprema', 'Bolt de Gelo Suprema', 'Bolt de Energia Suprema',
-  'Bolt de Luz Suprema', 'Bolt de Sombra Suprema', 'Bolt de Veneno Suprema',
   'Bolt do Dragão', 'Bolt do Demonio', 'Bolt do Anjo',
   'Bolt do Caos', 'Bolt da Tempestade', 'Bolt do Trovão',
-  'Bolt do Relâmpago', 'Bolt do Vento', 'Bolt do Oceano',
 ];
 
 // ============================================================
@@ -543,8 +380,8 @@ const FERRAMENTAS = [
   'Pá', 'Corda', 'Lanterna',
   'Tocha', 'Fósforo', 'Isqueiro',
   'Faca de Caça', 'Faca de Sobrevivência', 'Canivete',
-  'Machado de Batalha', 'Machado de Guerra', 'Picareta de Ferro',
-  'Picareta de Aço', 'Picareta de Mithril', 'Picareta de Dragão',
+  'Picareta de Ferro', 'Picareta de Aço', 'Picareta de Mithril',
+  'Picareta de Dragão', 'Picareta de Cristal', 'Picareta de Fogo',
   'Enxada de Ferro', 'Enxada de Aço', 'Enxada de Mithril',
   'Pá de Ferro', 'Pá de Aço', 'Pá de Mithril',
   'Corda de Seda', 'Corda de Couro', 'Corda de Ferro',
@@ -555,15 +392,10 @@ const FERRAMENTAS = [
   'Martelo de Ferreiro', 'Martelo de Ourives', 'Martelo de Fundição',
   'Alicate', 'Tenaz', 'Grampo',
   'Cunha', 'Cunha de Ferro', 'Cunha de Aço',
-  'Cunha de Mithril', 'Cunha de Dragão', 'Cunha de Cristal',
   'Serra', 'Serra de Ferro', 'Serra de Aço',
-  'Serra de Mithril', 'Serra de Dragão', 'Serra de Cristal',
   'Lima', 'Lima de Ferro', 'Lima de Aço',
-  'Lima de Mithril', 'Lima de Dragão', 'Lima de Cristal',
   'Broca', 'Broca de Ferro', 'Broca de Aço',
-  'Broca de Mithril', 'Broca de Dragão', 'Broca de Cristal',
   'Esmeril', 'Esmeril de Ferro', 'Esmeril de Aço',
-  'Esmeril de Mithril', 'Esmeril de Dragão', 'Esmeril de Cristal',
 ];
 
 // ============================================================
@@ -581,7 +413,6 @@ const CONTAINERS = [
   'Baú', 'Baú de Ferro', 'Baú de Aço',
   'Baú de Mithril', 'Baú de Dragão', 'Baú de Cristal',
   'Baú de Ouro', 'Baú de Prata', 'Baú de Platina',
-  'Baú do Tesouro', 'Baú do Herói', 'Baú do Lendário',
   'Caixa', 'Caixa de Ferro', 'Caixa de Aço',
   'Caixa de Mithril', 'Caixa de Dragão', 'Caixa de Cristal',
   'Cesto', 'Cesto de Ferro', 'Cesto de Aço',
@@ -595,96 +426,46 @@ const CONTAINERS = [
   'Arca de Mithril', 'Arca de Dragão', 'Arca de Cristal',
   'Cofre', 'Cofre de Ferro', 'Cofre de Aço',
   'Cofre de Mithril', 'Cofre de Dragão', 'Cofre de Cristal',
-  'Cofre de Ouro', 'Cofre de Prata', 'Cofre de Platina',
 ];
 
 // ============================================================
 // COMIDA
 // ============================================================
 const COMIDA = [
-  // Carnes
   'Carne', 'Carne Assada', 'Carne Grelhada',
   'Carne de Porco', 'Carne de Vaca', 'Carne de Frango',
   'Carne de Peixe', 'Carne de Dragão', 'Carne de Demonio',
   'Carne de Lobo', 'Carne de Urso', 'Carne de Veado',
   'Carne de Coelho', 'Carne de Pato', 'Carne de Peru',
   'Carne de Cordeiro', 'Carne de Cabra', 'Carne de Ovelha',
-  'Carne de Javali', 'Carne de Cervo', 'Carne de Alce',
-  'Carne de Bisão', 'Carne de Búfalo', 'Carne de Camelo',
-  'Carne de Canguru', 'Carne de Rinoceronte', 'Carne de Elefante',
-  'Carne de Hipopótamo', 'Carne de Crocodilo', 'Carne de Jacaré',
-  
-  // Pães
   'Pão', 'Pão de Centeio', 'Pão Integral',
   'Pão de Mel', 'Pão de Queijo', 'Pão de Alho',
   'Pão de Milho', 'Pão de Trigo', 'Pão de Cevada',
-  'Pão de Aveia', 'Pão de Linhaça', 'Pão de Gergelim',
-  'Pão de Castanha', 'Pão de Nozes', 'Pão de Amêndoas',
-  'Pão de Frutas', 'Pão de Passas', 'Pão de Canela',
-  'Pão de Chocolate', 'Pão de Baunilha', 'Pão de Coco',
-  'Pão de Cenoura', 'Pão de Abóbora', 'Pão de Batata',
-  
-  // Queijos
   'Queijo', 'Queijo Fresco', 'Queijo Curado',
   'Queijo de Cabra', 'Queijo de Ovelha', 'Queijo de Vaca',
   'Queijo Azul', 'Queijo Brie', 'Queijo Camembert',
   'Queijo Gouda', 'Queijo Emmental', 'Queijo Parmesão',
-  'Queijo Mozzarella', 'Queijo Provolone', 'Queijo Ricota',
-  'Queijo Mascarpone', 'Queijo Fontina', 'Queijo Gruyère',
-  'Queijo Manchego', 'Queijo Feta', 'Queijo Halloumi',
-  
-  // Leites
   'Leite', 'Leite Fresco', 'Leite de Cabra',
   'Leite de Ovelha', 'Leite de Vaca', 'Leite de Búfala',
-  'Leite de Coco', 'Leite de Amêndoa', 'Leite de Soja',
-  'Leite de Arroz', 'Leite de Aveia', 'Leite de Castanha',
-  
-  // Mels
   'Mel', 'Mel de Abelha', 'Mel de Flores',
   'Mel Silvestre', 'Mel de Eucalipto', 'Mel de Laranjeira',
-  'Mel de Alecrim', 'Mel de Tomilho', 'Mel de Rosmaninho',
-  'Mel de Castanheiro', 'Mel de Tília', 'Mel de Acácia',
-  'Mel de Girassol', 'Mel de Alfafa', 'Mel de Trevo',
-  
-  // Peixes
   'Peixe', 'Peixe Fresco', 'Peixe Grelhado',
   'Peixe Assado', 'Peixe Salgado', 'Peixe Defumado',
   'Salmão', 'Truta', 'Atum',
   'Bacalhau', 'Sardinha', 'Anchova',
-  'Cavala', 'Linguado', 'Robalo',
-  'Dourada', 'Pescada', 'Garoupa',
-  'Lúcio', 'Barbo', 'Carpa',
-  'Enguia', 'Lampreia', 'Esturjão',
-  
-  // Frutas
   'Maçã', 'Pêra', 'Uva',
   'Laranja', 'Limão', 'Banana',
   'Manga', 'Abacaxi', 'Melancia',
   'Melão', 'Morango', 'Cereja',
   'Pêssego', 'Ameixa', 'Damasco',
-  'Nectarina', 'Kiwi', 'Maracujá',
-  'Goiaba', 'Caqui', 'Figo',
-  'Romã', 'Carambola', 'Jabuticaba',
-  'Acerola', 'Caju', 'Cupuaçu',
-  'Graviola', 'Jaca', 'Lichia',
-  
-  // Castanhas
   'Castanha', 'Noz', 'Amêndoa',
   'Avelã', 'Pistache', 'Caju',
-  'Castanha de Caju', 'Castanha do Pará', 'Castanha de Macadâmia',
-  'Amendoim', 'Coco', 'Semente de Girassol',
-  'Semente de Abóbora', 'Semente de Linhaça', 'Semente de Chia',
-  
-  // Sobremesas
   'Bolo', 'Bolo de Chocolate', 'Bolo de Baunilha',
   'Torta', 'Torta de Maçã', 'Torta de Limão',
   'Sorvete', 'Sorvete de Chocolate', 'Sorvete de Baunilha',
   'Pudim', 'Pudim de Leite', 'Pudim de Chocolate',
-  'Gelatina', 'Mousse', 'Creme',
   'Brigadeiro', 'Beijinho', 'Cajuzinho',
   'Quindim', 'Pavê', 'Panetone',
-  'Chocotone', 'Bolo de Fubá', 'Bolo de Laranja',
-  'Bolo de Cenoura', 'Bolo de Banana', 'Bolo de Milho',
 ];
 
 // ============================================================
@@ -704,8 +485,6 @@ const IMBUEMENT = [
   'Essência de Fogo Grande', 'Essência de Gelo Grande', 'Essência de Energia Grande',
   'Essência de Terra Grande', 'Essência de Vento Grande', 'Essência de Luz Grande',
   'Essência de Sombra Grande', 'Essência de Vida Grande', 'Essência de Mana Grande',
-  'Essência de Força Grande', 'Essência de Destreza Grande', 'Essência de Agilidade Grande',
-  'Essência de Velocidade Grande', 'Essência de Regeneração Grande', 'Essência de Proteção Grande',
   'Essência de Fogo Suprema', 'Essência de Gelo Suprema', 'Essência de Energia Suprema',
   'Essência de Terra Suprema', 'Essência de Vento Suprema', 'Essência de Luz Suprema',
   'Essência de Sombra Suprema', 'Essência de Vida Suprema', 'Essência de Mana Suprema',
@@ -724,15 +503,10 @@ const MINEIROS = [
   'Minério de Ferro Puro', 'Minério de Aço Puro', 'Minério de Mithril Puro',
   'Minério de Dragão Puro', 'Minério de Ouro Puro', 'Minério de Prata Puro',
   'Minério de Platina Puro', 'Minério de Cristal Puro', 'Minério de Diamante Puro',
-  'Minério de Safira Puro', 'Minério de Rubi Puro', 'Minério de Esmeralda Puro',
-  'Minério de Ametista Puro', 'Minério de Topázio Puro', 'Minério de Quartzo Puro',
   'Minério de Chumbo', 'Minério de Zinco', 'Minério de Níquel',
   'Minério de Cobalto', 'Minério de Manganês', 'Minério de Tungstênio',
   'Minério de Titânio', 'Minério de Vanádio', 'Minério de Cromo',
   'Minério de Molibdênio', 'Minério de Tântalo', 'Minério de Niobe',
-  'Minério de Háfnio', 'Minério de Zircônio', 'Minério de Rutênio',
-  'Minério de Ródio', 'Minério de Paládio', 'Minério de Ósmio',
-  'Minério de Irídio', 'Minério de Rênio', 'Minério de Tecnécio',
 ];
 
 // ============================================================
@@ -746,13 +520,9 @@ const MOEDAS = [
   'Moeda de Ouro Grande', 'Moeda de Prata Grande', 'Moeda de Platina Grande',
   'Moeda de Cristal Grande', 'Moeda de Dragão Grande', 'Moeda de Diamante Grande',
   'Moeda de Safira Grande', 'Moeda de Rubi Grande', 'Moeda de Esmeralda Grande',
-  'Moeda de Ametista Grande', 'Moeda de Topázio Grande', 'Moeda de Quartzo',
   'Moeda de Ouro Puro', 'Moeda de Prata Pura', 'Moeda de Platina Pura',
   'Moeda de Cristal Puro', 'Moeda de Dragão Puro', 'Moeda de Diamante Puro',
-  'Moeda de Safira Pura', 'Moeda de Rubi Pura', 'Moeda de Esmeralda Pura',
-  'Moeda de Ametista Pura', 'Moeda de Topázio Pura', 'Moeda de Quartzo Puro',
   'Moeda de Bronze', 'Moeda de Níquel', 'Moeda de Cobalto',
-  'Moeda de Manganês', 'Moeda de Tungstênio', 'Moeda de Titânio',
   'Moeda do Rei', 'Moeda da Rainha', 'Moeda do Império',
   'Moeda do Reino', 'Moeda da Coroa', 'Moeda do Trono',
 ];
@@ -761,88 +531,41 @@ const MOEDAS = [
 // MISCELÂNEA
 // ============================================================
 const MISC = [
-  // Pergaminhos
   'Pergaminho', 'Pergaminho de Magia', 'Pergaminho de Proteção',
   'Pergaminho de Poder', 'Pergaminho de Sabedoria', 'Pergaminho de Conhecimento',
   'Pergaminho de Cura', 'Pergaminho de Força', 'Pergaminho de Destreza',
   'Pergaminho de Agilidade', 'Pergaminho de Velocidade', 'Pergaminho de Regeneração',
   'Pergaminho de Invisibilidade', 'Pergaminho de Resistência', 'Pergaminho de Veneno',
   'Pergaminho de Fogo', 'Pergaminho de Gelo', 'Pergaminho de Energia',
-  'Pergaminho de Luz', 'Pergaminho de Sombra', 'Pergaminho de Sangue',
-  'Pergaminho de Guerra', 'Pergaminho de Batalha', 'Pergaminho do Herói',
-  
-  // Livros
   'Livro', 'Livro de Magia', 'Livro de Poções',
   'Livro de Runas', 'Livro de Imbuement', 'Livro de Receitas',
   'Livro de Encantamentos', 'Livro de Feitiços', 'Livro de Maldições',
   'Livro de Bênçãos', 'Livro de Profecias', 'Livro de Lendas',
   'Livro de História', 'Livro de Geografia', 'Livro de Bestiário',
-  'Livro de Alquimia', 'Livro de Herbalismo', 'Livro de Astronomia',
-  'Livro de Astrologia', 'Livro de Numerologia', 'Livro de Tarô',
-  'Livro de Runas Antigas', 'Livro de Símbolos', 'Livro de Cifras',
-  
-  // Chaves
   'Chave', 'Chave de Ferro', 'Chave de Aço',
   'Chave de Mithril', 'Chave de Dragão', 'Chave de Cristal',
   'Chave de Ouro', 'Chave de Prata', 'Chave de Platina',
-  'Chave de Diamante', 'Chave de Safira', 'Chave de Rubi',
-  'Chave de Esmeralda', 'Chave de Ametista', 'Chave de Topázio',
   'Chave do Tesouro', 'Chave do Cofre', 'Chave do Baú',
   'Chave da Masmorra', 'Chave da Torre', 'Chave do Castelo',
-  'Chave do Reino', 'Chave do Trono', 'Chave do Destino',
-  'Anel de Chave', 'Cadeado', 'Cadeado de Ferro',
-  'Cadeado de Aço', 'Cadeado de Mithril', 'Cadeado de Dragão',
-  'Cadeado de Cristal', 'Cadeado de Ouro', 'Cadeado de Prata',
-  
-  // Cofres
-  'Cofre', 'Cofre de Ferro', 'Cofre de Aço',
-  'Cofre de Mithril', 'Cofre de Dragão', 'Cofre de Cristal',
-  'Cofre de Ouro', 'Cofre de Prata', 'Cofre de Platina',
-  'Cofre de Diamante', 'Cofre de Safira', 'Cofre de Rubi',
-  
-  // Mapas
+  'Cadeado', 'Cadeado de Ferro', 'Cadeado de Aço',
+  'Cadeado de Mithril', 'Cadeado de Dragão', 'Cadeado de Cristal',
   'Bússola', 'Mapa', 'Mapa do Tesouro',
   'Mapa da Caverna', 'Mapa da Masmorra', 'Mapa do Labirinto',
   'Mapa do Mundo', 'Mapa do Reino', 'Mapa do Império',
-  'Mapa das Estrelas', 'Mapa do Céu', 'Mapa do Inferno',
-  'Mapa do Paraíso', 'Mapa do Submundo', 'Mapa do Abismo',
-  'Mapa das Profundezas', 'Mapa das Alturas', 'Mapa das Planícies',
-  'Mapa das Florestas', 'Mapa dos Desertos', 'Mapa dos Oceanos',
-  
-  // Instrumentos
   'Lupa', 'Telescópio', 'Binóculo',
   'Microscópio', 'Periscópio', 'Caleidoscópio',
   'Relógio', 'Relógio de Areia', 'Relógio de Sol',
   'Relógio de Lua', 'Relógio de Estrelas', 'Relógio de Vento',
   'Balança', 'Pesos', 'Medidas',
-  'Termômetro', 'Barômetro', 'Higrômetro',
-  'Anemômetro', 'Pluviômetro', 'Sismógrafo',
-  
-  // Garrafas
   'Garrafa', 'Garrafa de Água', 'Garrafa de Vinho',
   'Garrafa de Cerveja', 'Garrafa de Licor', 'Garrafa de Veneno',
-  'Garrafa de Veneno', 'Garrafa de Poção', 'Garrafa de Essência',
-  'Garrafa de Óleo', 'Garrafa de Álcool', 'Garrafa de Extrato',
-  'Garrafa de Conhaque', 'Garrafa de Whisky', 'Garrafa de Rum',
-  'Garrafa de Vodka', 'Garrafa de Gin', 'Garrafa de Tequila',
-  'Garrafa de Champanhe', 'Garrafa de Espumante', 'Garrafa de Sidra',
-  
-  // Vidros
+  'Garrafa de Poção', 'Garrafa de Essência', 'Garrafa de Óleo',
   'Vidro', 'Vidro de Poção', 'Vidro de Essência',
   'Vidro de Cristal', 'Vidro de Diamante', 'Vidro de Safira',
-  'Vidro de Rubi', 'Vidro de Esmeralda', 'Vidro de Ametista',
-  'Vidro de Topázio', 'Vidro de Quartzo', 'Vidro de Ônix',
-  'Vidro de Jade', 'Vidro de Âmbar', 'Vidro de Pérola',
-  'Vidro de Coral', 'Vidro de Marfim', 'Vidro de Obsidiana',
-  
-  // Tecidos
   'Tecido', 'Tecido de Seda', 'Tecido de Couro',
   'Tecido de Linho', 'Tecido de Algodão', 'Tecido de Lã',
   'Tecido de Veludo', 'Tecido de Cetim', 'Tecido de Brocado',
   'Tecido de Camurça', 'Tecido de Microfibra', 'Tecido de Nylon',
-  'Tecido de Poliéster', 'Tecido de Acrílico', 'Tecido de Elastano',
-  'Tecido de Lycra', 'Tecido de Spandex', 'Tecido de Rayon',
-  'Tecido de Viscose', 'Tecido de Modal', 'Tecido de Tencel',
 ];
 
 // ============================================================
@@ -920,9 +643,32 @@ function getCategories() {
 }
 
 function searchItems(query) {
-  if (!query || query.length < 2) return [];
-  const q = query.toLowerCase();
-  return ALL_ITEMS.filter(item => item.toLowerCase().includes(q));
+  if (!query || query.length === 0) {
+    return [];
+  }
+  const searchTerm = query.trim().toLowerCase();
+  if (searchTerm.length === 0) {
+    return [];
+  }
+  return ALL_ITEMS.filter(item => item.toLowerCase().includes(searchTerm));
+}
+
+function searchItemsInCategory(query, category) {
+  if (!query || query.length === 0) {
+    return [];
+  }
+  const searchTerm = query.trim().toLowerCase();
+  const items = HUNTERA_ITEMS[category] || [];
+  return items.filter(item => item.toLowerCase().includes(searchTerm));
+}
+
+function autocompleteItems(query, limit = 20) {
+  if (!query || query.length === 0) {
+    return [];
+  }
+  const searchTerm = query.trim().toLowerCase();
+  const results = ALL_ITEMS.filter(item => item.toLowerCase().includes(searchTerm));
+  return results.slice(0, limit);
 }
 
 function getCommonBlocked() {
@@ -954,6 +700,8 @@ window.COMMON_BLOCKED_ITEMS = COMMON_BLOCKED_ITEMS;
 window.getItemsByCategory = getItemsByCategory;
 window.getCategories = getCategories;
 window.searchItems = searchItems;
+window.searchItemsInCategory = searchItemsInCategory;
+window.autocompleteItems = autocompleteItems;
 window.getCommonBlocked = getCommonBlocked;
 window.getAllItemsCount = getAllItemsCount;
 window.getCategoryCount = getCategoryCount;
@@ -974,4 +722,5 @@ console.log('📦 ========================================');
 console.log('📦 Items carregados com sucesso!');
 console.log('📦 Use window.ALL_ITEMS para acessar a lista completa.');
 console.log('📦 Use window.searchItems("termo") para buscar itens.');
+console.log('📦 Use window.autocompleteItems("termo") para autocomplete.');
 console.log('📦 ========================================');

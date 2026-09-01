@@ -1,62 +1,80 @@
-// background.js - VERIFIQUE SE ESTÁ ASSIM
-console.log('🔧 Background service worker carregado!');
+// background.js - Adicione estas funções
 
 // ============================================================
-// CONFIGURAÇÃO DO GITHUB
+// ESTADO DO BOT
 // ============================================================
-const GITHUB_CONFIG = {
-  owner: 'wandersonlt',
-  repo: 'huntera-bot',
-  branch: 'main'
-};
+let botActive = true;
 
 // ============================================================
-// DETECTAR PÁGINA DO JOGO - APENAS LOG
+// SALVAR ESTADO DO BOT
 // ============================================================
-chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
-  if (changeInfo.status === 'complete' && tab.url?.includes('huntera.com.br/game')) {
-    console.log('🎯 Página do jogo detectada!');
-    // NÃO INJETA NADA AQUI - O CONTENT SCRIPT FAZ ISSO!
-  }
-});
+function saveBotState() {
+  chrome.storage.local.set({ botActive: botActive });
+}
 
 // ============================================================
-// ABRIR DASHBOARD
+// CARREGAR ESTADO DO BOT
 // ============================================================
-function openDashboardPopup() {
-  console.log('🪟 Abrindo dashboard...');
-  chrome.windows.create({
-    url: chrome.runtime.getURL('dashboard/dashboard.html'),
-    type: 'popup',
-    width: 500,
-    height: 650,
-    focused: true
+function loadBotState() {
+  chrome.storage.local.get(['botActive'], (result) => {
+    if (result.botActive !== undefined) {
+      botActive = result.botActive;
+    }
+    console.log('📊 Estado do bot:', botActive ? 'ATIVO' : 'INATIVO');
   });
 }
 
 // ============================================================
-// ESCUTAR MENSAGENS
+// INICIAR BOT
+// ============================================================
+function startBot() {
+  botActive = true;
+  saveBotState();
+  sendToContent({ action: 'startBot' });
+  console.log('▶️ Bot iniciado');
+}
+
+// ============================================================
+// PARAR BOT
+// ============================================================
+function stopBot() {
+  botActive = false;
+  saveBotState();
+  sendToContent({ action: 'stopBot' });
+  console.log('⏹️ Bot parado');
+}
+
+// ============================================================
+// ESCUTAR MENSAGENS (atualizado)
 // ============================================================
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   console.log('📨 Mensagem:', message);
 
   switch (message.action) {
     case 'getStatus':
-      sendResponse({ isRunning: false, selectedHunt: 'rat-hunt', selectedPull: 'Cauteloso' });
-      break;
-
-    case 'openDashboardPopup':
-      openDashboardPopup();
-      sendResponse({ success: true });
+      sendResponse({ 
+        isRunning: botActive,
+        selectedHunt: 'folda-hunt', 
+        selectedPull: 'Agressivo',
+        blockedItems: [],
+        huntEnabled: true,
+        sellEnabled: true,
+        partyEnabled: true
+      });
       break;
 
     case 'startBot':
+      startBot();
+      sendResponse({ success: true });
+      break;
+
     case 'stopBot':
-    case 'updateConfig':
+      stopBot();
+      sendResponse({ success: true });
+      break;
+
     case 'toggleModule':
-    case 'setBlockedItems':
-    case 'forceSell':
-    case 'startHunt':
+      // Envia para o content
       chrome.tabs.query({ url: 'https://huntera.com.br/game' }, (tabs) => {
         if (tabs.length > 0) {
           chrome.tabs.sendMessage(tabs[0].id, message);
@@ -65,11 +83,11 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       sendResponse({ success: true });
       break;
 
-    default:
-      sendResponse({ error: 'Ação desconhecida' });
+    // ... resto das ações
   }
 
   return true;
 });
 
-console.log('✅ Background service worker pronto!');
+// Carrega estado ao iniciar
+loadBotState();

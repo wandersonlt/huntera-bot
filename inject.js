@@ -13,6 +13,7 @@ if (window.__hunteraInjectLoaded) {
   // ESTADO DO BOT
   // ============================================================
   let isRunning = false;
+  let botActive = true;
   
   // ============================================================
   // FUNÇÕES DE COMUNICAÇÃO
@@ -26,6 +27,24 @@ if (window.__hunteraInjectLoaded) {
   }
 
   // ============================================================
+  // VERIFICAR SE O BOT DEVE PARAR
+  // ============================================================
+  function shouldStopBot() {
+    return new Promise((resolve) => {
+      // Verifica via chrome.storage
+      if (typeof chrome !== 'undefined' && chrome.storage) {
+        chrome.storage.local.get(['botActive'], (result) => {
+          const isActive = result.botActive !== false;
+          resolve(!isActive);
+        });
+      } else {
+        // Fallback: verificar a variável local
+        resolve(!botActive);
+      }
+    });
+  }
+
+  // ============================================================
   // ESCUTAR MENSAGENS DA EXTENSÃO
   // ============================================================
   window.addEventListener('message', async (event) => {
@@ -35,6 +54,7 @@ if (window.__hunteraInjectLoaded) {
       
       switch (action) {
         case 'startBot':
+          botActive = true;
           isRunning = true;
           if (window.huntModule) window.huntModule.start();
           if (window.sellModule) window.sellModule.start();
@@ -44,6 +64,7 @@ if (window.__hunteraInjectLoaded) {
           break;
 
         case 'stopBot':
+          botActive = false;
           isRunning = false;
           if (window.huntModule) window.huntModule.stop();
           if (window.sellModule) window.sellModule.stop();
@@ -113,24 +134,46 @@ if (window.__hunteraInjectLoaded) {
   function getStatus() {
     return {
       isRunning: isRunning,
+      botActive: botActive,
       selectedHunt: localStorage.getItem('huntera_selectedHunt') || 'rat-hunt',
       selectedPull: localStorage.getItem('huntera_selectedPull') || 'Cauteloso'
     };
   }
 
-  function startLoop() {
+  // ============================================================
+  // LOOP PRINCIPAL (com verificação de parada)
+  // ============================================================
+  async function startLoop() {
     if (!isRunning) return;
     
-    if (window.huntModule && window.huntModule.isRunning()) {
-      window.huntModule.loop();
-    }
-    if (window.sellModule && window.sellModule.isRunning()) {
-      window.sellModule.loop();
-    }
-    if (window.partyModule && window.partyModule.isRunning()) {
-      window.partyModule.loop();
+    // Verifica se deve parar
+    const shouldStop = await shouldStopBot();
+    if (shouldStop || !botActive) {
+      console.log('⏹️ Bot desativado pela extensão, parando...');
+      isRunning = false;
+      if (window.huntModule) window.huntModule.stop();
+      if (window.sellModule) window.sellModule.stop();
+      if (window.partyModule) window.partyModule.stop();
+      sendToExtension('botStopped', { success: true });
+      return;
     }
     
+    // Executa os módulos
+    try {
+      if (window.huntModule && window.huntModule.isRunning()) {
+        await window.huntModule.loop();
+      }
+      if (window.sellModule && window.sellModule.isRunning()) {
+        await window.sellModule.loop();
+      }
+      if (window.partyModule && window.partyModule.isRunning()) {
+        await window.partyModule.loop();
+      }
+    } catch (e) {
+      console.error('❌ Erro no loop:', e);
+    }
+    
+    // Continua o loop
     setTimeout(startLoop, 2000);
   }
 
@@ -191,12 +234,17 @@ if (window.__hunteraInjectLoaded) {
   window.__hunteraBot = {
     start: () => { 
       console.log('▶️ Iniciando bot...');
+      botActive = true;
       isRunning = true; 
       startLoop(); 
     },
     stop: () => { 
       console.log('⏹️ Parando bot...');
+      botActive = false;
       isRunning = false; 
+      if (window.huntModule) window.huntModule.stop();
+      if (window.sellModule) window.sellModule.stop();
+      if (window.partyModule) window.partyModule.stop();
     },
     status: getStatus,
     modules: {
@@ -210,9 +258,11 @@ if (window.__hunteraInjectLoaded) {
     PartyModule: window.PartyModule,
     ALL_ITEMS: window.ALL_ITEMS,
     searchItems: function(query) {
-      if (!query || query.length < 2) return [];
+      if (!query || query.length === 0) return [];
       const q = query.toLowerCase();
-      return (window.ALL_ITEMS || []).filter(item => item.toLowerCase().includes(q));
+      return (window.ALL_ITEMS || []).filter(item => 
+        item.toLowerCase().includes(q)
+      );
     }
   };
 
@@ -226,6 +276,5 @@ if (window.__hunteraInjectLoaded) {
   // ============================================================
   // AGUARDAR SCRIPTS E INICIALIZAR
   // ============================================================
-  // Aguarda 1 segundo para os scripts serem carregados
   setTimeout(initModules, 1500);
 }

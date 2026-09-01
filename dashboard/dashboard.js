@@ -90,7 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
     { id: 'hell-hub-hunt', title: 'Hell Hub', monster: 'Demon, Vexclaw, Grimeleech, Hellflayer' }
   ];
 
-  // ============ FUNÇÕES ============
+  // ============ FUNÇÕES DE LOG E STATUS ============
   function addLog(message, type = 'info') {
     const div = document.createElement('div');
     div.className = type;
@@ -121,6 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // ============ CARREGAR DADOS ============
   function populateHunts() {
     huntSelect.innerHTML = '';
     HUNTS_LIST.forEach(hunt => {
@@ -137,6 +138,7 @@ document.addEventListener('DOMContentLoaded', () => {
       ALL_ITEMS = window.ALL_ITEMS;
       CATEGORIES = window.getCategories ? window.getCategories() : [];
       populateCategories();
+      addLog(`📦 ${ALL_ITEMS.length} itens carregados`);
       return true;
     }
 
@@ -168,6 +170,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // ============ ITENS BLOQUEADOS ============
   function renderBlockedItems(items) {
     BLOCKED_ITEMS = items || [];
     blockedItemsList.innerHTML = '';
@@ -198,15 +201,101 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // ============================================================
+  // 🔧 CORREÇÃO: BUSCA DE ITENS (Case Insensitive + Busca Parcial)
+  // ============================================================
   function searchItems(query) {
-    if (!query || query.length < 2) {
-      itemSearchResults.textContent = '';
+    if (!query || query.length === 0) {
+      itemSearchResults.innerHTML = '';
       return [];
     }
-    const q = query.toLowerCase();
-    const results = ALL_ITEMS.filter(item => item.toLowerCase().includes(q));
-    itemSearchResults.textContent = `🔍 ${results.length} resultados encontrados`;
-    return results.slice(0, 20);
+    
+    const searchTerm = query.trim();
+    
+    // Usa a função global se disponível (mais completa)
+    if (window.searchItems) {
+      const results = window.searchItems(searchTerm);
+      return results;
+    }
+    
+    // Fallback: busca local
+    const q = searchTerm.toLowerCase();
+    const results = ALL_ITEMS.filter(item => 
+      item.toLowerCase().includes(q)
+    );
+    
+    return results;
+  }
+
+  // ============================================================
+  // 🔧 CORREÇÃO: AUTOCOMPLETE COM SUGESTÕES
+  // ============================================================
+  function showAutocompleteSuggestions(query) {
+    if (!query || query.length === 0) {
+      itemSearchResults.innerHTML = '';
+      return;
+    }
+    
+    const searchTerm = query.trim();
+    let results = [];
+    
+    // Usa autocomplete global se disponível
+    if (window.autocompleteItems) {
+      results = window.autocompleteItems(searchTerm, 20);
+    } else {
+      results = searchItems(searchTerm).slice(0, 20);
+    }
+    
+    if (!results || results.length === 0) {
+      itemSearchResults.innerHTML = '<span style="color: #8b949e;font-size:12px;">🔍 Nenhum item encontrado</span>';
+      return;
+    }
+    
+    // Mostra os resultados
+    const html = results.map(item => 
+      `<span style="display:inline-block;padding:4px 10px;margin:3px;background:#21262d;border:1px solid #30363d;border-radius:4px;cursor:pointer;font-size:12px;" data-item="${item}">${item}</span>`
+    ).join(' ');
+    
+    itemSearchResults.innerHTML = html;
+    itemSearchResults.innerHTML += `<div style="margin-top:4px;font-size:11px;color:#8b949e;">${results.length} resultados encontrados</div>`;
+    
+    // Adiciona evento de clique para cada sugestão
+    itemSearchResults.querySelectorAll('[data-item]').forEach(el => {
+      el.addEventListener('click', () => {
+        const itemName = el.dataset.item;
+        itemSearch.value = itemName;
+        itemSearchResults.innerHTML = '';
+        addBlockedItem(itemName);
+      });
+    });
+  }
+
+  // ============================================================
+  // 🔧 CORREÇÃO: ADICIONAR ITEM BLOQUEADO
+  // ============================================================
+  function addBlockedItem(itemName) {
+    if (!itemName || itemName.trim() === '') {
+      addLog('⚠️ Digite um nome de item', 'warn');
+      return;
+    }
+    
+    const item = itemName.trim();
+    
+    // Verifica se já está bloqueado (case insensitive)
+    const exists = BLOCKED_ITEMS.some(b => b.toLowerCase() === item.toLowerCase());
+    if (exists) {
+      addLog(`⚠️ Item já está bloqueado: ${item}`, 'warn');
+      return;
+    }
+    
+    // Adiciona
+    const newItems = [...BLOCKED_ITEMS, item];
+    chrome.runtime.sendMessage({ action: 'setBlockedItems', items: newItems }, () => {
+      renderBlockedItems(newItems);
+      itemSearch.value = '';
+      itemSearchResults.innerHTML = '';
+      addLog(`📦 Item bloqueado: ${item}`);
+    });
   }
 
   // ============ EVENT LISTENERS ============
@@ -284,7 +373,6 @@ document.addEventListener('DOMContentLoaded', () => {
       
       if (response && response.success) {
         addLog('✅ Scripts recarregados do GitHub!');
-        // Recarregar itens
         setTimeout(() => {
           loadItems();
           addLog(`📦 ${ALL_ITEMS.length} itens disponíveis`);
@@ -323,51 +411,41 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Items - Busca
+  // ============================================================
+  // 🔧 CORREÇÃO: ITEMS - BUSCA COM AUTOCOMPLETE
+  // ============================================================
+  let searchTimeout = null;
+
+  // Busca com debounce
   itemSearch.addEventListener('input', function() {
     const query = this.value.trim();
-    if (query.length >= 2) {
-      const results = searchItems(query);
-      if (results.length > 0) {
-        itemSearchResults.innerHTML = results.map(item => 
-          `<span style="display:inline-block;padding:2px 8px;margin:2px;background:#21262d;border-radius:4px;cursor:pointer;" data-item="${item}">${item}</span>`
-        ).join(' ');
-        itemSearchResults.querySelectorAll('[data-item]').forEach(el => {
-          el.addEventListener('click', () => {
-            itemSearch.value = el.dataset.item;
-            itemSearchResults.innerHTML = '';
-          });
-        });
-      } else {
-        itemSearchResults.textContent = '🔍 Nenhum item encontrado';
-      }
-    } else {
-      itemSearchResults.textContent = '';
+    
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
     }
+    
+    if (query.length === 0) {
+      itemSearchResults.innerHTML = '';
+      return;
+    }
+    
+    searchTimeout = setTimeout(() => {
+      showAutocompleteSuggestions(query);
+    }, 300);
   });
 
-  // Add Item
+  // Add Item - Usando a função corrigida
   addItemBtn.addEventListener('click', () => {
     const item = itemSearch.value.trim();
-    if (item && !BLOCKED_ITEMS.includes(item)) {
-      const newItems = [...BLOCKED_ITEMS, item];
-      chrome.runtime.sendMessage({ action: 'setBlockedItems', items: newItems }, () => {
-        renderBlockedItems(newItems);
-        itemSearch.value = '';
-        itemSearchResults.textContent = '';
-        addLog(`📦 Item bloqueado: ${item}`);
-      });
-    } else if (item && BLOCKED_ITEMS.includes(item)) {
-      addLog(`⚠️ Item já está bloqueado: ${item}`, 'warn');
-    } else {
-      addLog('⚠️ Digite um nome de item', 'warn');
-    }
+    addBlockedItem(item);
   });
 
   // Enter key
   itemSearch.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
-      addItemBtn.click();
+      e.preventDefault();
+      const item = itemSearch.value.trim();
+      addBlockedItem(item);
     }
   });
 
