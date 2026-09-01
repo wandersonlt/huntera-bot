@@ -10,10 +10,10 @@ if (window.__hunteraInjectLoaded) {
   window.__hunteraInjectLoaded = true;
   
   // ============================================================
-  // ESTADO DO BOT
+  // ESTADO DO BOT - INICIAR DESATIVADO
   // ============================================================
   let isRunning = false;
-  let botActive = true;
+  let botActive = false;  // ← MUDADO PARA false (desativado por padrão)
   
   // ============================================================
   // FUNÇÕES DE COMUNICAÇÃO
@@ -31,14 +31,12 @@ if (window.__hunteraInjectLoaded) {
   // ============================================================
   function shouldStopBot() {
     return new Promise((resolve) => {
-      // Verifica via chrome.storage
       if (typeof chrome !== 'undefined' && chrome.storage) {
         chrome.storage.local.get(['botActive'], (result) => {
           const isActive = result.botActive !== false;
           resolve(!isActive);
         });
       } else {
-        // Fallback: verificar a variável local
         resolve(!botActive);
       }
     });
@@ -146,10 +144,9 @@ if (window.__hunteraInjectLoaded) {
   async function startLoop() {
     if (!isRunning) return;
     
-    // Verifica se deve parar
     const shouldStop = await shouldStopBot();
     if (shouldStop || !botActive) {
-      console.log('⏹️ Bot desativado pela extensão, parando...');
+      console.log('⏹️ Bot desativado, parando...');
       isRunning = false;
       if (window.huntModule) window.huntModule.stop();
       if (window.sellModule) window.sellModule.stop();
@@ -158,7 +155,6 @@ if (window.__hunteraInjectLoaded) {
       return;
     }
     
-    // Executa os módulos
     try {
       if (window.huntModule && window.huntModule.isRunning()) {
         await window.huntModule.loop();
@@ -173,17 +169,15 @@ if (window.__hunteraInjectLoaded) {
       console.error('❌ Erro no loop:', e);
     }
     
-    // Continua o loop
     setTimeout(startLoop, 2000);
   }
 
   // ============================================================
-  // INICIALIZAR MÓDULOS (com verificação e retry)
+  // INICIALIZAR MÓDULOS
   // ============================================================
   function initModules() {
     console.log('🔧 Inicializando módulos...');
     
-    // Verifica se as classes existem
     const hasHunt = typeof window.HuntModule !== 'undefined';
     const hasSell = typeof window.SellModule !== 'undefined';
     const hasParty = typeof window.PartyModule !== 'undefined';
@@ -195,14 +189,12 @@ if (window.__hunteraInjectLoaded) {
     console.log('  PartyModule:', hasParty ? '✅' : '❌');
     console.log('  ALL_ITEMS:', hasItems ? `${window.ALL_ITEMS.length} itens` : '❌');
     
-    // Se os módulos não estiverem disponíveis, tenta novamente depois
     if (!hasHunt || !hasSell || !hasParty || !hasItems) {
-      console.log('⏳ Aguardando scripts carregarem... tentando novamente em 2s');
+      console.log('⏳ Aguardando scripts... tentando novamente em 2s');
       setTimeout(initModules, 2000);
       return;
     }
     
-    // Inicializa os módulos
     if (hasHunt) {
       window.huntModule = new window.HuntModule();
       window.huntModule.init();
@@ -226,6 +218,7 @@ if (window.__hunteraInjectLoaded) {
     console.log('  huntModule:', typeof window.huntModule);
     console.log('  sellModule:', typeof window.sellModule);
     console.log('  partyModule:', typeof window.partyModule);
+    console.log('📊 Bot está DESATIVADO por padrão. Clique em "Iniciar Bot" para ativar.');
   }
 
   // ============================================================
@@ -252,7 +245,6 @@ if (window.__hunteraInjectLoaded) {
       sell: () => window.sellModule,
       party: () => window.partyModule
     },
-    // EXPORTA AS CLASSES PARA ACESSO DIRETO
     HuntModule: window.HuntModule,
     SellModule: window.SellModule,
     PartyModule: window.PartyModule,
@@ -273,8 +265,5 @@ if (window.__hunteraInjectLoaded) {
   console.log('  window.__hunteraBot.status() - Ver status');
   console.log('  window.__hunteraBot.searchItems("termo") - Buscar itens');
 
-  // ============================================================
-  // AGUARDAR SCRIPTS E INICIALIZAR
-  // ============================================================
   setTimeout(initModules, 1500);
 }
