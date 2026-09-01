@@ -12,6 +12,7 @@ class HuntModule extends HunteraModule {
       partyMode: localStorage.getItem('huntera_partyMode') || 'solo'
     };
 
+    // TODAS AS 52 HUNTS
     this.allHunts = [
       { id: 'rat-hunt', title: 'Rat Cellars', monster: 'Rat' },
       { id: 'spider-hunt', title: 'Spider Nest', monster: 'Spider' },
@@ -72,25 +73,59 @@ class HuntModule extends HunteraModule {
     this._cooldown = 5000;
     this._isNavigating = false;
 
+    // ============================================================
+    // SELETORES CORRETOS (baseado no mapeamento)
+    // ============================================================
     this.selectors = {
-      huntTab: '[data-tab="hunt"]',
+      // Navegação
+      navHunt: '#nav-start-hunt',  // Botão "Caçar" na navegação
+      huntTab: '.hunt-tab[data-tab="hunts"]',  // Aba "Caçadas"
+      
+      // Janela/Hunt
       huntWindow: '.hunt-window',
+      huntBrowser: '.hunt-browser',
+      huntList: '.hunt-list',
       huntEntry: '.hunt-entry',
+      huntSelected: '.hunt-entry.selected',
+      huntPicked: '.hunt-entry.player-picked',
+      huntId: 'data-hunt-id',
       huntTitle: '.hunt-entry-copy strong',
       huntMonster: '.hunt-entry-monster',
-      pullOptions: '.hunt-tier',
+      huntMeta: '.hunt-entry-meta',
+      huntSearch: '.hunt-search input',
+      huntListSummary: '.hunt-list-summary',
+      
+      // Pulls
       pullContainer: '.hunt-tiers',
+      pullOptions: '.hunt-tier',
+      pullSelected: '.hunt-tier.selected',
+      
+      // Botões da Hunt
       startBtn: '#hunt-start',
       teamBtn: '#hunt-start-team',
+      findTeamBtn: '#hunt-find-team',
+      cancelBtn: '#hunt-cancel',
+      arenaBtn: '#hunt-enter-arena',
+      
+      // Status
       leaveBtn: '#nav-leave-hunt',
       awayNote: '.hunt-away-note',
-      selected: '.hunt-entry.selected'
+      inHuntIndicator: '.hud-hunt-action',
+      
+      // Party
+      inviteCard: '.party-invite.invite-card',
+      inviteTitle: '.invite-title',
+      inviteActions: '.invite-actions',
+      inviteBtn: '.invite-actions button',
     };
 
     this._loadConfig();
     this.log(`📋 ${this.allHunts.length} caçadas carregadas`, 'info');
   }
 
+  // ============================================================
+  // ABRIR JANELA DE CAÇADAS
+  // ============================================================
   async openHuntWindow() {
     if (this._isNavigating) {
       this.log('Já está navegando...', 'warn');
@@ -101,6 +136,7 @@ class HuntModule extends HunteraModule {
     this.log('Abrindo janela de caçadas...');
 
     try {
+      // Verifica se a janela já está aberta
       const windowEl = this.findElement(this.selectors.huntWindow);
       if (windowEl && windowEl.offsetParent !== null) {
         this.log('Janela já está aberta');
@@ -108,6 +144,15 @@ class HuntModule extends HunteraModule {
         return true;
       }
 
+      // Tenta clicar no botão "Caçar" da navegação
+      let navHunt = this.findElement(this.selectors.navHunt);
+      if (navHunt && this.safeClick(navHunt)) {
+        await this.delay(800);
+        this._isNavigating = false;
+        return true;
+      }
+
+      // Tenta clicar na aba "Caçadas"
       let huntTab = this.findElement(this.selectors.huntTab);
       if (huntTab && this.safeClick(huntTab)) {
         await this.delay(800);
@@ -115,10 +160,11 @@ class HuntModule extends HunteraModule {
         return true;
       }
 
+      // Tenta encontrar por texto
       const allButtons = document.querySelectorAll('button, a, [role="tab"]');
       for (const btn of allButtons) {
         const text = btn.textContent?.trim() || '';
-        if (text.includes('Caçada') || text.includes('Hunt') || text.includes('Caçadas')) {
+        if (text.includes('Caçada') || text.includes('Hunt') || text.includes('Caçar')) {
           if (this.safeClick(btn)) {
             await this.delay(800);
             this._isNavigating = false;
@@ -138,6 +184,9 @@ class HuntModule extends HunteraModule {
     }
   }
 
+  // ============================================================
+  // ESCANEAR HUNTS
+  // ============================================================
   async scanHunts() {
     this.log('Escaneando caçadas...');
     
@@ -150,7 +199,7 @@ class HuntModule extends HunteraModule {
 
     const entries = this.findElements(this.selectors.huntEntry);
     if (!entries || !entries.length) {
-      this.log('Nenhuma caçada encontrada, usando lista padrão', 'warn');
+      this.log('Nenhuma caçada encontrada', 'warn');
       return this.allHunts;
     }
 
@@ -159,19 +208,20 @@ class HuntModule extends HunteraModule {
     const hunts = [];
     for (const entry of entries) {
       try {
-        const huntId = entry.getAttribute('data-hunt-id') || '';
+        const huntId = entry.getAttribute(this.selectors.huntId) || '';
         const titleEl = entry.querySelector(this.selectors.huntTitle);
         const monsterEl = entry.querySelector(this.selectors.huntMonster);
         const title = titleEl ? titleEl.textContent.trim() : '';
         const monster = monsterEl ? monsterEl.textContent.trim() : '';
-        const selected = entry.classList.contains('selected');
+        const selected = entry.classList.contains('selected') || entry.classList.contains('player-picked');
 
         if (title) {
           hunts.push({
             id: huntId || title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z-]/g, ''),
             title: title,
             monster: monster || 'Desconhecido',
-            selected: selected
+            selected: selected,
+            element: entry
           });
         }
       } catch (e) {
@@ -188,6 +238,9 @@ class HuntModule extends HunteraModule {
     return this.allHunts;
   }
 
+  // ============================================================
+  // SELECIONAR HUNT
+  // ============================================================
   async selectHunt(huntId) {
     this.log(`Selecionando caçada: ${huntId}`);
     
@@ -198,11 +251,12 @@ class HuntModule extends HunteraModule {
 
     await this.delay(300);
 
+    // Tenta encontrar pelo data-hunt-id
     const entries = this.findElements(this.selectors.huntEntry);
     for (const entry of entries) {
-      const id = entry.getAttribute('data-hunt-id');
+      const id = entry.getAttribute(this.selectors.huntId);
       if (id === huntId) {
-        if (entry.classList.contains('selected')) {
+        if (entry.classList.contains('selected') || entry.classList.contains('player-picked')) {
           this.log(`Caçada já selecionada: ${huntId}`);
           return true;
         }
@@ -218,6 +272,7 @@ class HuntModule extends HunteraModule {
       }
     }
 
+    // Tenta encontrar pelo título
     const hunt = this.allHunts.find(h => h.id === huntId);
     if (hunt) {
       for (const entry of entries) {
@@ -240,6 +295,9 @@ class HuntModule extends HunteraModule {
     return false;
   }
 
+  // ============================================================
+  // APLICAR PULL
+  // ============================================================
   async applyPull(pullName) {
     this.log(`Aplicando pull: ${pullName}`);
     
@@ -273,8 +331,9 @@ class HuntModule extends HunteraModule {
     return false;
   }
 
-    // modules/hunt.js - startHunt() CORRIGIDO (versão definitiva)
-
+  // ============================================================
+  // INICIAR HUNT
+  // ============================================================
   async startHunt() {
     this.log('🚀 Iniciando caçada...');
     
@@ -300,24 +359,23 @@ class HuntModule extends HunteraModule {
     await this.delay(500);
 
     // ============================================================
-    // 🔧 CORREÇÃO: Esperar o botão ficar habilitado E visível
+    // PROCURAR BOTÃO DE INICIAR
     // ============================================================
-    
-    this.log('🔍 Procurando botão #hunt-start...');
+    this.log('🔍 Procurando botão de iniciar...');
     
     let startBtn = null;
     let attempts = 0;
     const maxAttempts = 15;
     
     while (attempts < maxAttempts) {
-      startBtn = document.querySelector('#hunt-start');
+      startBtn = this.findElement(this.selectors.startBtn);
       if (startBtn) {
         const isVisible = startBtn.offsetParent !== null;
         const isEnabled = !startBtn.disabled;
         const rect = startBtn.getBoundingClientRect();
         const isOnScreen = rect.width > 0 && rect.height > 0;
         
-        this.log(`⏳ Tentativa ${attempts + 1}: visível=${isVisible}, habilitado=${isEnabled}, na tela=${isOnScreen}`);
+        this.log(`⏳ Tentativa ${attempts + 1}: visível=${isVisible}, habilitado=${isEnabled}`);
         
         if (isVisible && isEnabled && isOnScreen) {
           this.log('✅ Botão está pronto para clique!');
@@ -328,62 +386,27 @@ class HuntModule extends HunteraModule {
       await this.delay(500);
     }
 
-    // Se encontrou o botão, tenta clicar de várias formas
-    if (startBtn) {
+    // Tenta clicar no botão "Iniciar caçada"
+    if (startBtn && !startBtn.disabled && startBtn.offsetParent !== null) {
       this.log('✅ Clicando em "Iniciar caçada"');
-      
-      // Scroll para o botão
       startBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
       await this.delay(300);
       
-      // Tenta clicar de forma nativa
       try {
         startBtn.click();
-        this.log('✅ Clique nativo executado!');
+        this.log('✅ Clique executado!');
         await this.delay(2000);
         this._retryCount = 0;
         this.emit('huntStarted', this.config.selectedHunt);
         this.log('✅ Caçada iniciada!');
         return true;
       } catch (e) {
-        this.log(`⚠️ Clique nativo falhou: ${e.message}`);
-      }
-      
-      // Tenta clicar via evento dispatch
-      try {
-        const clickEvent = new MouseEvent('click', {
-          view: window,
-          bubbles: true,
-          cancelable: true
-        });
-        startBtn.dispatchEvent(clickEvent);
-        this.log('✅ Evento de clique dispatchado!');
-        await this.delay(2000);
-        this._retryCount = 0;
-        this.emit('huntStarted', this.config.selectedHunt);
-        this.log('✅ Caçada iniciada!');
-        return true;
-      } catch (e) {
-        this.log(`⚠️ Evento dispatch falhou: ${e.message}`);
-      }
-      
-      // Tenta clicar via safeClick (scroll + click)
-      if (this.safeClick(startBtn)) {
-        this.log('✅ safeClick executado!');
-        await this.delay(2000);
-        this._retryCount = 0;
-        this.emit('huntStarted', this.config.selectedHunt);
-        this.log('✅ Caçada iniciada!');
-        return true;
+        this.log(`⚠️ Clique falhou: ${e.message}`);
       }
     }
 
-    // ============================================================
-    // 🔧 FALLBACK: Tentar o botão #hunt-start-team
-    // ============================================================
-    
-    this.log('🔍 Tentando botão #hunt-start-team...');
-    let teamBtn = document.querySelector('#hunt-start-team');
+    // Tenta o botão "Iniciar com o time"
+    let teamBtn = this.findElement(this.selectors.teamBtn);
     if (teamBtn && !teamBtn.disabled && teamBtn.offsetParent !== null) {
       this.log('✅ Clicando em "Iniciar com o time"');
       teamBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -400,50 +423,6 @@ class HuntModule extends HunteraModule {
       }
     }
 
-    // ============================================================
-    // 🔧 FALLBACK 2: Tentar qualquer botão com "Iniciar" na janela
-    // ============================================================
-    
-    this.log('🔍 Procurando qualquer botão com "Iniciar"...');
-    const allButtons = document.querySelectorAll('button');
-    for (const btn of allButtons) {
-      const text = btn.textContent?.trim() || '';
-      if (text.includes('Iniciar') && !btn.disabled && btn.offsetParent !== null) {
-        const parent = btn.closest('.hunt-window, [class*="hunt"]');
-        if (parent) {
-          this.log(`✅ Botão encontrado na janela: "${text}"`);
-          btn.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          await this.delay(300);
-          try {
-            btn.click();
-            await this.delay(2000);
-            this._retryCount = 0;
-            this.emit('huntStarted', this.config.selectedHunt);
-            this.log('✅ Caçada iniciada!');
-            return true;
-          } catch (e) {
-            this.log(`⚠️ Falha ao clicar em "${text}": ${e.message}`);
-          }
-        }
-      }
-    }
-
-    // ============================================================
-    // DEBUG: Listar botões visíveis
-    // ============================================================
-    this.log('🔍 DEBUG: Botões visíveis na página:');
-    let btnCount = 0;
-    for (const btn of allButtons) {
-      if (btn.offsetParent !== null) {
-        btnCount++;
-        const text = btn.textContent?.trim() || '';
-        const id = btn.id || '';
-        const disabled = btn.disabled ? ' [DESABILITADO]' : '';
-        this.log(`  ${btnCount}. "${text}"${disabled} (id: ${id})`);
-      }
-    }
-    this.log(`📊 Total de botões visíveis: ${btnCount}`);
-
     this.log('❌ Não foi possível iniciar a caçada', 'warn');
 
     if (this.config.retryOnFail && this._retryCount < this.config.maxRetries) {
@@ -456,15 +435,29 @@ class HuntModule extends HunteraModule {
     return false;
   }
 
+  // ============================================================
+  // VERIFICAR STATUS
+  // ============================================================
   isInHunt() {
+    // Verifica botão de sair
     const leaveBtn = this.findElement(this.selectors.leaveBtn);
     if (leaveBtn && leaveBtn.offsetParent !== null && !leaveBtn.hidden) {
       return true;
     }
 
+    // Verifica aviso de hunt ativa
     const awayNote = this.findElement(this.selectors.awayNote);
     if (awayNote && awayNote.offsetParent !== null && !awayNote.hidden) {
       return true;
+    }
+
+    // Verifica indicador visual
+    const indicator = this.findElement(this.selectors.inHuntIndicator);
+    if (indicator && indicator.offsetParent !== null) {
+      const classes = indicator.className || '';
+      if (classes.includes('hud-leave-hunt') || classes.includes('hud-hunt-action')) {
+        return true;
+      }
     }
 
     return false;
@@ -474,6 +467,9 @@ class HuntModule extends HunteraModule {
     return !this.isInHunt();
   }
 
+  // ============================================================
+  // SAIR DA HUNT
+  // ============================================================
   async leaveHunt() {
     this.log('Saindo da caçada...');
     
@@ -481,12 +477,16 @@ class HuntModule extends HunteraModule {
     if (leaveBtn && this.safeClick(leaveBtn)) {
       await this.delay(1000);
       this.emit('huntLeft');
+      this.log('✅ Saiu da caçada');
       return true;
     }
 
     return false;
   }
 
+  // ============================================================
+  // LOOP PRINCIPAL
+  // ============================================================
   async loop() {
     if (!this.isRunning()) return;
 
@@ -502,21 +502,9 @@ class HuntModule extends HunteraModule {
     await this.delay(2000);
   }
 
-  setPartyMode(mode) {
-    if (['solo', 'leader', 'member'].includes(mode)) {
-      this.config.partyMode = mode;
-      this._saveConfig();
-      localStorage.setItem('huntera_partyMode', mode);
-      this.log(`Modo Party alterado para: ${mode}`);
-      return true;
-    }
-    return false;
-  }
-
-  getPartyMode() {
-    return this.config.partyMode;
-  }
-
+  // ============================================================
+  // GETTERS
+  // ============================================================
   getHunts() {
     return this.allHunts;
   }
@@ -535,6 +523,21 @@ class HuntModule extends HunteraModule {
 
   getHuntByName(name) {
     return this.allHunts.find(h => h.title === name);
+  }
+
+  setPartyMode(mode) {
+    if (['solo', 'leader', 'member'].includes(mode)) {
+      this.config.partyMode = mode;
+      this._saveConfig();
+      localStorage.setItem('huntera_partyMode', mode);
+      this.log(`Modo Party alterado para: ${mode}`);
+      return true;
+    }
+    return false;
+  }
+
+  getPartyMode() {
+    return this.config.partyMode;
   }
 }
 
