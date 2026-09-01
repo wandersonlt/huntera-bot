@@ -12,8 +12,12 @@
   ],
   "host_permissions": [
     "https://huntera.com.br/*",
-    "http://huntera.com.br/*"
+    "http://huntera.com.br/*",
+    "https://raw.githubusercontent.com/*"
   ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval' blob:; object-src 'self'"
+  },
   "action": {
     "default_popup": "popup/popup.html",
     "default_icon": {
