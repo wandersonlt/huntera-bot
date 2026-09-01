@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      width: 220px;
+      background: #0d1117;
+      color: #f0f6fc;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      padding: 12px;
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .title { font-size: 14px; font-weight: bold; }
+    .status {
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .status-dot.online { background: #3fb950; }
+    .status-dot.offline { background: #ff6b6b; }
+    .btn {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid #30363d;
+      border-radius: 6px;
+      background: #21262d;
+      color: #f0f6fc;
+      cursor: pointer;
+      font-size: 12px;
+      margin-bottom: 6px;
+      transition: background 0.2s;
+    }
+    .btn:hover { background: #30363d; }
+    .btn-primary {
+      background: #238636;
+      border-color: #2ea043;
+    }
+    .btn-primary:hover { background: #2ea043; }
+    .btn-danger {
+      background: #da3633;
+      border-color: #f85149;
+    }
+    .btn-danger:hover { background: #f85149; }
+    .footer {
+      margin-top: 12px;
+      font-size: 10px;
+      color: #8b949e;
+      text-align: center;
+      border-top: 1px solid #30363d;
+      padding-top: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <span class="title">🎯 Huntera Bot</span>
+    <span class="status">
+      <span class="status-dot offline" id="statusDot"></span>
+      <span id="statusText">Offline</span>
+    </span>
+  </div>
+
+  <button class="btn btn-primary" id="startBtn">▶️ Iniciar Bot</button>
+  <button class="btn" id="dashboardBtn">⚙️ Abrir Configuração</button>
+
+  <div class="footer">v1.0.0 • Huntera Bot</div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
