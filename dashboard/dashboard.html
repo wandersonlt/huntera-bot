@@ -80,7 +80,14 @@
       <label for="retryOnFail">Retry on Fail</label>
     </div>
     
-    <button class="btn" id="toggleHuntBtn" style="width:100%;">🟢 Ativo</button>
+    <div class="flex gap-4">
+      <button class="btn btn-success flex-1" id="saveHuntBtn">💾 Salvar</button>
+      <button class="btn" id="toggleHuntBtn">🟢 Ativo</button>
+    </div>
+    
+    <div id="huntSavedStatus" style="margin-top:8px;font-size:12px;color:#8b949e;text-align:center;">
+      ⚠️ Nenhuma hunt salva
+    </div>
   </div>
 
   <!-- Tab: Venda -->
@@ -93,6 +100,23 @@
     <div class="checkbox-group">
       <input type="checkbox" id="autoSell" checked>
       <label for="autoSell">Vender na cidade</label>
+    </div>
+    
+    <div class="checkbox-group">
+      <input type="checkbox" id="autoSellInHunt">
+      <label for="autoSellInHunt">Vender dentro da hunt (quando cap cheio)</label>
+    </div>
+    
+    <div class="form-group">
+      <label>Limite de Cap para vender</label>
+      <select id="capThreshold">
+        <option value="0.70">70%</option>
+        <option value="0.75">75%</option>
+        <option value="0.80">80%</option>
+        <option value="0.85" selected>85%</option>
+        <option value="0.90">90%</option>
+        <option value="0.95">95%</option>
+      </select>
     </div>
     
     <div class="form-group">

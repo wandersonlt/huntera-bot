@@ -98,6 +98,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // ============================================================
+  // STATUS
+  // ============================================================
   function updateStatus() {
     chrome.runtime.sendMessage({ action: 'getStatus' }, (response) => {
       if (response) {
@@ -117,6 +120,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // ============================================================
+  // HUNTS
+  // ============================================================
   function populateHunts() {
     huntSelect.innerHTML = '';
     HUNTS_LIST.forEach(hunt => {
@@ -128,6 +134,9 @@ document.addEventListener('DOMContentLoaded', () => {
     addLog(`🏹 ${HUNTS_LIST.length} caçadas carregadas`);
   }
 
+  // ============================================================
+  // ITEMS
+  // ============================================================
   function loadItems() {
     if (window.ALL_ITEMS && window.ALL_ITEMS.length) {
       ALL_ITEMS = window.ALL_ITEMS;
@@ -163,6 +172,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // ============================================================
+  // ITENS BLOQUEADOS
+  // ============================================================
   function renderBlockedItems(items) {
     BLOCKED_ITEMS = items || [];
     blockedItemsList.innerHTML = '';
@@ -193,6 +205,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // ============================================================
+  // BUSCA DE ITENS
+  // ============================================================
   function searchItems(query) {
     if (!query || query.length === 0) {
       itemSearchResults.innerHTML = '';
@@ -262,7 +277,69 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // ============ TABS ============
+  // ============================================================
+  // HUNT SALVA - STATUS E BOTÃO
+  // ============================================================
+  const saveHuntBtn = document.getElementById('saveHuntBtn');
+  const huntSavedStatus = document.getElementById('huntSavedStatus');
+
+  function updateHuntSavedStatus() {
+    const selectedHuntId = huntSelect.value;
+    const selectedHunt = HUNTS_LIST.find(h => h.id === selectedHuntId);
+    const savedHunt = localStorage.getItem('huntera_selectedHunt');
+    const savedPull = localStorage.getItem('huntera_selectedPull');
+    
+    if (savedHunt && savedHunt === selectedHuntId) {
+      huntSavedStatus.className = 'saved';
+      huntSavedStatus.textContent = `✅ Salvo: ${selectedHunt ? selectedHunt.title : selectedHuntId} (Pull: ${savedPull || 'Cauteloso'})`;
+    } else {
+      huntSavedStatus.className = 'unsaved';
+      huntSavedStatus.textContent = `⚠️ Não salvo - Clique em "Salvar" para confirmar`;
+    }
+  }
+
+  saveHuntBtn.addEventListener('click', () => {
+    const huntId = huntSelect.value;
+    const hunt = HUNTS_LIST.find(h => h.id === huntId);
+    const pull = pullSelect.value;
+    const mode = partyModeSelect.value;
+    
+    if (!huntId) {
+      addLog('⚠️ Selecione uma caçada antes de salvar', 'warn');
+      return;
+    }
+    
+    localStorage.setItem('huntera_selectedHunt', huntId);
+    localStorage.setItem('huntera_selectedPull', pull);
+    localStorage.setItem('huntera_partyMode', mode);
+    
+    chrome.runtime.sendMessage({
+      action: 'updateConfig',
+      config: { 
+        selectedHunt: huntId,
+        selectedPull: pull,
+        partyMode: mode
+      }
+    }, () => {
+      addLog(`💾 Hunt salva: ${hunt ? hunt.title : huntId} (Pull: ${pull})`);
+      updateHuntSavedStatus();
+      
+      saveHuntBtn.textContent = '✅ Salvo!';
+      saveHuntBtn.style.background = '#238636';
+      setTimeout(() => {
+        saveHuntBtn.textContent = '💾 Salvar';
+        saveHuntBtn.style.background = '';
+      }, 2000);
+    });
+  });
+
+  huntSelect.addEventListener('change', updateHuntSavedStatus);
+  pullSelect.addEventListener('change', updateHuntSavedStatus);
+  partyModeSelect.addEventListener('change', updateHuntSavedStatus);
+
+  // ============================================================
+  // TABS
+  // ============================================================
   tabs.forEach(tab => {
     tab.addEventListener('click', () => {
       tabs.forEach(t => t.classList.remove('active'));
@@ -272,7 +349,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // ============ HUNT SELECT ============
+  // ============================================================
+  // HUNT SELECT
+  // ============================================================
   huntSelect.addEventListener('change', () => {
     const huntId = huntSelect.value;
     const hunt = HUNTS_LIST.find(h => h.id === huntId);
@@ -285,7 +364,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // ============ PULL SELECT ============
+  // ============================================================
+  // PULL SELECT
+  // ============================================================
   pullSelect.addEventListener('change', () => {
     const pull = pullSelect.value;
     chrome.runtime.sendMessage({
@@ -297,7 +378,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // ============ PARTY MODE ============
+  // ============================================================
+  // PARTY MODE
+  // ============================================================
   partyModeSelect.addEventListener('change', () => {
     const mode = partyModeSelect.value;
     chrome.runtime.sendMessage({
@@ -309,14 +392,18 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // ============ FORCE SELL ============
+  // ============================================================
+  // FORCE SELL
+  // ============================================================
   forceSellBtn.addEventListener('click', () => {
     chrome.runtime.sendMessage({ action: 'forceSell' }, () => {
       addLog('💰 Forçando venda...');
     });
   });
 
-  // ============ RELOAD SCRIPTS ============
+  // ============================================================
+  // RELOAD SCRIPTS
+  // ============================================================
   reloadBtn.addEventListener('click', () => {
     reloadBtn.textContent = '⏳';
     reloadBtn.disabled = true;
@@ -336,15 +423,29 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // ============ TOGGLE MODULES ============
+  // ============================================================
+  // TOGGLE MODULES
+  // ============================================================
   toggleHuntBtn.addEventListener('click', () => {
     const isCurrentlyActive = toggleHuntBtn.textContent.includes('🟢');
     const newState = !isCurrentlyActive;
     toggleHuntBtn.textContent = newState ? '🟢 Ativo' : '🔴 Desativado';
     toggleHuntBtn.style.background = newState ? '' : '#da3633';
+    
     chrome.runtime.sendMessage({ action: 'toggleModule', module: 'hunt', enabled: newState }, (response) => {
       if (response && response.success) {
         addLog(`🏹 Módulo Hunt ${newState ? 'ativado' : 'desativado'}`);
+        if (newState) {
+          const savedHunt = localStorage.getItem('huntera_selectedHunt');
+          if (!savedHunt) {
+            addLog('⚠️ Nenhuma hunt salva! Clique em "Salvar" primeiro.', 'warn');
+            toggleHuntBtn.textContent = '🔴 Desativado';
+            toggleHuntBtn.style.background = '#da3633';
+            chrome.runtime.sendMessage({ action: 'toggleModule', module: 'hunt', enabled: false });
+            return;
+          }
+          addLog(`🏹 Hunt salva: ${savedHunt}`);
+        }
       } else {
         toggleHuntBtn.textContent = isCurrentlyActive ? '🟢 Ativo' : '🔴 Desativado';
         toggleHuntBtn.style.background = isCurrentlyActive ? '' : '#da3633';
@@ -377,7 +478,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // ============ ITEMS SEARCH ============
+  // ============================================================
+  // ITEMS SEARCH
+  // ============================================================
   let searchTimeout = null;
 
   itemSearch.addEventListener('input', function() {
@@ -405,7 +508,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // ============ CLEAR ITEMS ============
+  // ============================================================
+  // CLEAR ITEMS
+  // ============================================================
   clearItemsBtn.addEventListener('click', () => {
     chrome.runtime.sendMessage({ action: 'setBlockedItems', items: [] }, () => {
       renderBlockedItems([]);
@@ -413,7 +518,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // ============ EXPORT ITEMS ============
+  // ============================================================
+  // EXPORT ITEMS
+  // ============================================================
   exportItemsBtn.addEventListener('click', () => {
     const data = JSON.stringify(BLOCKED_ITEMS, null, 2);
     const blob = new Blob([data], { type: 'application/json' });
@@ -426,7 +533,9 @@ document.addEventListener('DOMContentLoaded', () => {
     addLog(`📤 Itens exportados: ${BLOCKED_ITEMS.length} itens`);
   });
 
-  // ============ IMPORT ITEMS ============
+  // ============================================================
+  // IMPORT ITEMS
+  // ============================================================
   importItemsBtn.addEventListener('click', () => {
     const input = document.createElement('input');
     input.type = 'file';
@@ -456,12 +565,16 @@ document.addEventListener('DOMContentLoaded', () => {
     input.click();
   });
 
-  // ============ CLOSE ============
+  // ============================================================
+  // CLOSE
+  // ============================================================
   document.getElementById('closeBtn').addEventListener('click', () => {
     window.close();
   });
 
-  // ============ CHECKBOXES ============
+  // ============================================================
+  // CHECKBOXES
+  // ============================================================
   ['autoStart', 'retryOnFail', 'ignoreEquipped', 'autoSell', 'acceptInvite', 'acceptHunt', 'acceptCostShare', 'followLeader'].forEach(id => {
     const el = document.getElementById(id);
     if (el) {
@@ -473,7 +586,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // ============ COOLDOWN ============
+  // ============================================================
+  // COOLDOWN
+  // ============================================================
   document.getElementById('cooldownSelect').addEventListener('change', function() {
     chrome.runtime.sendMessage({
       action: 'updateConfig',
@@ -481,9 +596,48 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // ============ INITIALIZATION ============
+  // ============================================================
+  // CAP THRESHOLD
+  // ============================================================
+  const capThreshold = document.getElementById('capThreshold');
+  if (capThreshold) {
+    capThreshold.addEventListener('change', () => {
+      const config = { capThreshold: parseFloat(capThreshold.value) };
+      chrome.runtime.sendMessage({ action: 'updateConfig', config });
+      addLog(`📊 Limite de Cap: ${(parseFloat(capThreshold.value) * 100)}%`);
+    });
+  }
+
+  // ============================================================
+  // AUTO SELL IN HUNT
+  // ============================================================
+  const autoSellInHunt = document.getElementById('autoSellInHunt');
+  if (autoSellInHunt) {
+    autoSellInHunt.addEventListener('change', () => {
+      const config = { autoSellInHunt: autoSellInHunt.checked };
+      chrome.runtime.sendMessage({ action: 'updateConfig', config });
+      addLog(`🏹 Vender na hunt: ${autoSellInHunt.checked ? 'ativado' : 'desativado'}`);
+    });
+  }
+
+  // ============================================================
+  // INITIALIZATION
+  // ============================================================
   loadItems();
   populateHunts();
+  updateHuntSavedStatus();
+
+  const savedHunt = localStorage.getItem('huntera_selectedHunt');
+  const savedPull = localStorage.getItem('huntera_selectedPull');
+  const savedMode = localStorage.getItem('huntera_partyMode');
+
+  if (savedHunt) {
+    huntSelect.value = savedHunt;
+    if (savedPull) pullSelect.value = savedPull;
+    if (savedMode) partyModeSelect.value = savedMode;
+    updateHuntSavedStatus();
+    addLog(`📂 Hunt carregada: ${savedHunt} (Pull: ${savedPull || 'Cauteloso'})`);
+  }
 
   chrome.runtime.sendMessage({ action: 'getStatus' }, (response) => {
     if (response) {
@@ -501,6 +655,13 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('followLeader').checked = response.followLeader !== false;
       
       document.getElementById('cooldownSelect').value = response.sellCooldown || 10000;
+      
+      if (response.capThreshold !== undefined) {
+        document.getElementById('capThreshold').value = response.capThreshold;
+      }
+      if (response.autoSellInHunt !== undefined) {
+        document.getElementById('autoSellInHunt').checked = response.autoSellInHunt;
+      }
       
       const huntEnabled = response.huntEnabled !== false;
       toggleHuntBtn.textContent = huntEnabled ? '🟢 Ativo' : '🔴 Desativado';

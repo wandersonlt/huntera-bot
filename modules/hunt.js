@@ -71,10 +71,6 @@ class HuntModule extends HunteraModule {
     this._lastHuntTime = 0;
     this._cooldown = 5000;
     this._isNavigating = false;
-    
-    // ============================================================
-    // ⭐ FLAG PARA CONTROLAR SE A HUNT FOI ENCONTRADA
-    // ============================================================
     this._huntFound = false;
 
     this.selectors = {
@@ -283,9 +279,6 @@ class HuntModule extends HunteraModule {
     return false;
   }
 
-  // ============================================================
-  // START HUNT - COMPLETO
-  // ============================================================
   async startHunt() {
     this.log('🚀 Iniciando caçada...');
     
@@ -313,27 +306,25 @@ class HuntModule extends HunteraModule {
     await this.applyPull(this.config.selectedPull);
     await this.delay(500);
 
-    // ============================================================
-    // FORÇAR VISIBILIDADE DO BOTÃO
-    // ============================================================
-    this.log('🔍 Forçando visibilidade do botão...');
+    this.log('🔍 Verificando visibilidade da janela e botões...');
     
     const huntWindow = document.querySelector('.hunt-window');
-    if (huntWindow) {
-      this.log('✅ Janela encontrada, forçando visibilidade...');
-      huntWindow.style.display = 'block';
-      huntWindow.style.visibility = 'visible';
-      huntWindow.style.opacity = '1';
+    if (huntWindow && (huntWindow.offsetParent === null || huntWindow.hidden)) {
+      this.log('⚠️ Janela não está visível, corrigindo...');
+      huntWindow.style.display = '';
+      huntWindow.style.visibility = '';
+      huntWindow.style.opacity = '';
       huntWindow.removeAttribute('hidden');
       huntWindow.removeAttribute('aria-hidden');
     }
     
     const huntFooter = document.querySelector('.hunt-window footer');
-    if (huntFooter) {
-      this.log('✅ Footer encontrado, forçando visibilidade...');
-      huntFooter.style.display = 'flex';
-      huntFooter.style.visibility = 'visible';
-      huntFooter.style.opacity = '1';
+    if (huntFooter && (huntFooter.offsetParent === null || huntFooter.hidden)) {
+      this.log('⚠️ Footer não está visível, corrigindo...');
+      huntFooter.style.display = '';
+      huntFooter.style.visibility = '';
+      huntFooter.style.opacity = '';
+      huntFooter.removeAttribute('hidden');
     }
     
     const startBtn = document.querySelector('#hunt-start');
@@ -343,20 +334,24 @@ class HuntModule extends HunteraModule {
       return false;
     }
     
-    this.log('✅ Botão encontrado, forçando visibilidade...');
-    startBtn.style.display = 'inline-block';
-    startBtn.style.visibility = 'visible';
-    startBtn.style.opacity = '1';
-    startBtn.removeAttribute('hidden');
-    startBtn.removeAttribute('aria-hidden');
-    startBtn.disabled = false;
+    this.log('✅ Botão encontrado, verificando visibilidade...');
+    
+    if (startBtn.offsetParent === null || startBtn.hidden) {
+      this.log('⚠️ Botão não está visível, corrigindo...');
+      startBtn.style.display = '';
+      startBtn.style.visibility = '';
+      startBtn.style.opacity = '';
+      startBtn.removeAttribute('hidden');
+      startBtn.removeAttribute('aria-hidden');
+      startBtn.disabled = false;
+    }
     
     let parent = startBtn.parentElement;
     while (parent && parent !== document.body) {
       if (parent.offsetParent === null || parent.hidden) {
-        parent.style.display = 'block';
-        parent.style.visibility = 'visible';
-        parent.style.opacity = '1';
+        parent.style.display = '';
+        parent.style.visibility = '';
+        parent.style.opacity = '';
         parent.removeAttribute('hidden');
         parent.removeAttribute('aria-hidden');
       }
@@ -370,22 +365,16 @@ class HuntModule extends HunteraModule {
     this.log(`📊 Botão visível: ${isVisible}, tamanho: ${rect.width}x${rect.height}`);
     
     if (!isVisible) {
-      this.log('⚠️ Botão ainda não está visível, tentando novamente...');
-      startBtn.style.display = 'inline-block';
-      startBtn.style.visibility = 'visible';
-      startBtn.style.opacity = '1';
+      this.log('⚠️ Botão ainda não está visível, tentando scroll...');
+      startBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
       await this.delay(500);
       const rect2 = startBtn.getBoundingClientRect();
-      this.log(`📊 Segunda tentativa: ${rect2.width}x${rect2.height}`);
+      this.log(`📊 Após scroll: ${rect2.width}x${rect2.height}`);
     }
-    
-    this.log('📜 Scroll para o botão...');
-    startBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    await this.delay(500);
     
     const finalRect = startBtn.getBoundingClientRect();
     const isFinalVisible = finalRect.width > 0 && finalRect.height > 0;
-    this.log(`📊 Status final: visível=${isFinalVisible}, posição: ${finalRect.top}, ${finalRect.left}`);
+    this.log(`📊 Status final: visível=${isFinalVisible}`);
     
     if (isFinalVisible && !startBtn.disabled) {
       this.log('✅ Botão visível e habilitado, clicando...');
@@ -434,16 +423,15 @@ class HuntModule extends HunteraModule {
       this.log(`⚠️ Botão não está clicável: visível=${isFinalVisible}, disabled=${startBtn.disabled}`, 'warn');
     }
 
-    // ============================================================
-    // FALLBACKS
-    // ============================================================
     this.log('🔍 Tentando botão #hunt-find-team...');
     let findTeamBtn = document.querySelector('#hunt-find-team');
     if (findTeamBtn) {
-      findTeamBtn.style.display = 'inline-block';
-      findTeamBtn.style.visibility = 'visible';
-      findTeamBtn.removeAttribute('hidden');
-      findTeamBtn.disabled = false;
+      if (findTeamBtn.offsetParent === null || findTeamBtn.hidden) {
+        findTeamBtn.style.display = '';
+        findTeamBtn.style.visibility = '';
+        findTeamBtn.removeAttribute('hidden');
+        findTeamBtn.disabled = false;
+      }
       
       if (findTeamBtn.offsetParent !== null) {
         this.log('✅ Clicando em "Encontrar time"');
@@ -466,10 +454,12 @@ class HuntModule extends HunteraModule {
     this.log('🔍 Tentando botão #hunt-start-team...');
     let teamBtn = document.querySelector('#hunt-start-team');
     if (teamBtn) {
-      teamBtn.style.display = 'inline-block';
-      teamBtn.style.visibility = 'visible';
-      teamBtn.removeAttribute('hidden');
-      teamBtn.disabled = false;
+      if (teamBtn.offsetParent === null || teamBtn.hidden) {
+        teamBtn.style.display = '';
+        teamBtn.style.visibility = '';
+        teamBtn.removeAttribute('hidden');
+        teamBtn.disabled = false;
+      }
       
       if (teamBtn.offsetParent !== null) {
         this.log('✅ Clicando em "Iniciar com o time"');
@@ -538,14 +528,10 @@ class HuntModule extends HunteraModule {
     return false;
   }
 
-  // ============================================================
-  // LOOP PRINCIPAL - CORRIGIDO
-  // ============================================================
   async loop() {
     if (!this.isRunning()) return;
 
     try {
-      // Se já está em uma caçada, não faz nada
       if (this.isInHunt()) {
         if (this._huntFound) {
           this._huntFound = false;
@@ -555,7 +541,6 @@ class HuntModule extends HunteraModule {
         return;
       }
 
-      // Se está na cidade e autoStart está ativo
       if (this.isInCity() && this.config.autoStart && this.config.selectedHunt) {
         if (this._huntFound) {
           this.log('⏳ Caçada já encontrada, aguardando...');
