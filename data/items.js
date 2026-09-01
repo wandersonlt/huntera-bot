@@ -4,7 +4,6 @@
 // ARMAS
 // ============================================================
 const ARMAS = [
-  // Espadas
   'Espada Curta', 'Espada Longa', 'Espada de Duas Mãos',
   'Espada de Ferro', 'Espada de Aço', 'Espada de Mithril',
   'Espada de Dragão', 'Espada de Cristal', 'Espada de Fogo',
@@ -19,10 +18,6 @@ const ARMAS = [
   'Espada do Crepúsculo', 'Espada da Meia-Noite', 'Espada do Sol',
   'Espada da Lua', 'Espada das Estrelas', 'Espada do Vento',
   'Espada da Tempestade', 'Espada do Trovão', 'Espada do Relâmpago',
-  'Espada do Terremoto', 'Espada do Vulcão', 'Espada do Oceano',
-  'Espada do Deserto', 'Espada da Floresta', 'Espada das Montanhas',
-  
-  // Machados
   'Machado Curto', 'Machado Longo', 'Machado de Duas Mãos',
   'Machado de Ferro', 'Machado de Aço', 'Machado de Mithril',
   'Machado de Dragão', 'Machado de Cristal', 'Machado de Fogo',
@@ -35,8 +30,6 @@ const ARMAS = [
   'Machado do Crepúsculo', 'Machado da Meia-Noite', 'Machado do Sol',
   'Machado da Lua', 'Machado das Estrelas', 'Machado do Vento',
   'Machado da Tempestade', 'Machado do Trovão', 'Machado do Relâmpago',
-  
-  // Arcos
   'Arco Curto', 'Arco Longo', 'Arco de Guerra',
   'Arco de Ferro', 'Arco de Aço', 'Arco de Mithril',
   'Arco de Dragão', 'Arco de Cristal', 'Arco de Fogo',
@@ -49,9 +42,6 @@ const ARMAS = [
   'Arco da Alvorada', 'Arco do Crepúsculo', 'Arco da Meia-Noite',
   'Arco do Sol', 'Arco da Lua', 'Arco das Estrelas',
   'Arco do Vento', 'Arco da Tempestade', 'Arco do Trovão',
-  'Arco do Relâmpago', 'Arco do Oceano', 'Arco do Deserto',
-  
-  // Bestas
   'Besta', 'Besta de Ferro', 'Besta de Aço',
   'Besta de Mithril', 'Besta de Dragão', 'Besta de Cristal',
   'Besta de Fogo', 'Besta de Gelo', 'Besta de Energia',
@@ -62,9 +52,6 @@ const ARMAS = [
   'Besta do Destino', 'Besta da Alvorada', 'Besta do Crepúsculo',
   'Besta da Meia-Noite', 'Besta do Sol', 'Besta da Lua',
   'Besta das Estrelas', 'Besta do Vento', 'Besta da Tempestade',
-  'Besta do Trovão', 'Besta do Relâmpago', 'Besta do Oceano',
-  
-  // Bastões
   'Bastão', 'Bastão de Ferro', 'Bastão de Aço',
   'Bastão de Mithril', 'Bastão de Dragão', 'Bastão de Cristal',
   'Bastão de Fogo', 'Bastão de Gelo', 'Bastão de Energia',
@@ -77,8 +64,6 @@ const ARMAS = [
   'Bastão da Alvorada', 'Bastão do Crepúsculo', 'Bastão da Meia-Noite',
   'Bastão do Sol', 'Bastão da Lua', 'Bastão das Estrelas',
   'Bastão do Vento', 'Bastão da Tempestade', 'Bastão do Trovão',
-  
-  // Adagas
   'Adaga', 'Adaga de Ferro', 'Adaga de Aço',
   'Adaga de Mithril', 'Adaga de Dragão', 'Adaga de Cristal',
   'Adaga de Fogo', 'Adaga de Gelo', 'Adaga de Energia',
@@ -92,8 +77,6 @@ const ARMAS = [
   'Adaga do Sol', 'Adaga da Lua', 'Adaga das Estrelas',
   'Adaga do Vento', 'Adaga da Tempestade', 'Adaga do Trovão',
   'Adaga do Assassino', 'Adaga do Ladrão', 'Adaga do Espião',
-  
-  // Lanças
   'Lança', 'Lança de Ferro', 'Lança de Aço',
   'Lança de Mithril', 'Lança de Dragão', 'Lança de Cristal',
   'Lança de Fogo', 'Lança de Gelo', 'Lança de Energia',
@@ -106,8 +89,6 @@ const ARMAS = [
   'Lança da Alvorada', 'Lança do Crepúsculo', 'Lança da Meia-Noite',
   'Tridente', 'Tridente de Ferro', 'Tridente de Aço',
   'Tridente de Mithril', 'Tridente de Dragão', 'Tridente de Cristal',
-  
-  // Maças e Martelos
   'Maça', 'Maça de Ferro', 'Maça de Aço',
   'Maça de Mithril', 'Maça de Dragão', 'Maça de Cristal',
   'Maça de Fogo', 'Maça de Gelo', 'Maça de Energia',
@@ -117,8 +98,6 @@ const ARMAS = [
   'Martelo de Fogo', 'Martelo de Gelo', 'Martelo de Energia',
   'Martelo de Guerra', 'Martelo do Caos', 'Martelo do Herói',
   'Martelo do Lendário', 'Martelo do Cavaleiro', 'Martelo do Paladino',
-  
-  // Cajados e Clavas
   'Cajado', 'Cajado de Ferro', 'Cajado de Aço',
   'Cajado de Mithril', 'Cajado de Dragão', 'Cajado de Cristal',
   'Cajado de Fogo', 'Cajado de Gelo', 'Cajado de Energia',
@@ -128,8 +107,6 @@ const ARMAS = [
   'Clava de Mithril', 'Clava de Dragão', 'Clava de Cristal',
   'Clava de Fogo', 'Clava de Gelo', 'Clava de Energia',
   'Clava de Guerra', 'Clava do Caos', 'Clava do Herói',
-  
-  // Cetros
   'Cetro', 'Cetro de Ferro', 'Cetro de Aço',
   'Cetro de Mithril', 'Cetro de Dragão', 'Cetro de Cristal',
   'Cetro de Fogo', 'Cetro de Gelo', 'Cetro de Energia',
@@ -469,7 +446,7 @@ const COMIDA = [
 ];
 
 // ============================================================
-// IMBUEMENT (Essências)
+// IMBUEMENT
 // ============================================================
 const IMBUEMENT = [
   'Essência de Fogo', 'Essência de Gelo', 'Essência de Energia',
@@ -603,36 +580,18 @@ for (const category in HUNTERA_ITEMS) {
 // ITENS COMUMENTE BLOQUEADOS
 // ============================================================
 const COMMON_BLOCKED_ITEMS = [
-  'Poção de Vida Pequena',
-  'Poção de Vida Média',
-  'Poção de Mana Pequena',
-  'Poção de Mana Média',
-  'Poção de Regeneração',
-  'Poção de Cura',
-  'Carne',
-  'Carne Assada',
-  'Pão',
-  'Queijo',
-  'Leite',
-  'Mel',
-  'Peixe',
-  'Peixe Grelhado',
-  'Flecha',
-  'Bolt',
-  'Runa de Cura',
-  'Tocha',
-  'Lanterna',
-  'Corda',
-  'Pergaminho',
-  'Livro',
-  'Garrafa',
-  'Garrafa de Água',
-  'Vidro',
-  'Tecido',
+  'Poção de Vida Pequena', 'Poção de Vida Média',
+  'Poção de Mana Pequena', 'Poção de Mana Média',
+  'Poção de Regeneração', 'Poção de Cura',
+  'Carne', 'Carne Assada', 'Pão', 'Queijo',
+  'Leite', 'Mel', 'Peixe', 'Peixe Grelhado',
+  'Flecha', 'Bolt', 'Runa de Cura',
+  'Tocha', 'Lanterna', 'Corda', 'Pergaminho', 'Livro',
+  'Garrafa', 'Garrafa de Água', 'Vidro', 'Tecido',
 ];
 
 // ============================================================
-// FUNÇÕES AUXILIARES (APENAS UMA VEZ)
+// FUNÇÕES AUXILIARES
 // ============================================================
 function getItemsByCategory(category) {
   return HUNTERA_ITEMS[category] || [];
@@ -662,7 +621,7 @@ function searchItemsInCategory(query, category) {
   return items.filter(item => item.toLowerCase().includes(searchTerm));
 }
 
-function autocompleteItems(query, limit = 20) {
+function autocompleteItems(query, limit = 100) {
   if (!query || query.length === 0) {
     return [];
   }

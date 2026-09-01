@@ -16,32 +16,48 @@ const GITHUB_CONFIG = {
 console.log(`📦 GitHub: ${GITHUB_CONFIG.rawUrl}`);
 
 // ============================================================
-// ESTADO DO BOT - INICIAR DESATIVADO POR PADRÃO
+// ESTADO DO BOT
 // ============================================================
-let botActive = false;  // ← MUDADO PARA false (desativado por padrão)
+let botActive = false;
 let isRunning = false;
 
+const BOT_STATE = {
+  isRunning: false,
+  selectedHunt: 'rat-hunt',
+  selectedPull: 'Cauteloso',
+  huntEnabled: true,
+  sellEnabled: true,
+  partyEnabled: true,
+  blockedItems: [],
+  autoStart: true,
+  retryOnFail: true,
+  ignoreEquipped: true,
+  autoSell: true,
+  sellCooldown: 10000,
+  acceptInvite: true,
+  acceptHunt: true,
+  acceptCostShare: true,
+  followLeader: true,
+  partyMode: 'solo'
+};
+
 // ============================================================
-// SALVAR ESTADO DO BOT
+// SALVAR/ CARREGAR ESTADO
 // ============================================================
 function saveBotState() {
   chrome.storage.local.set({ botActive: botActive });
-  console.log(`📊 Estado do bot salvo: ${botActive ? 'ATIVO' : 'INATIVO'}`);
+  console.log(`📊 Estado salvo: ${botActive ? 'ATIVO' : 'INATIVO'}`);
 }
 
-// ============================================================
-// CARREGAR ESTADO DO BOT
-// ============================================================
 function loadBotState() {
   chrome.storage.local.get(['botActive'], (result) => {
     if (result.botActive !== undefined) {
       botActive = result.botActive;
     } else {
-      // Se não tiver configuração salva, mantém desativado
       botActive = false;
       saveBotState();
     }
-    console.log(`📊 Estado do bot carregado: ${botActive ? 'ATIVO' : 'INATIVO'}`);
+    console.log(`📊 Estado carregado: ${botActive ? 'ATIVO' : 'INATIVO'}`);
   });
 }
 
@@ -71,11 +87,8 @@ function openDashboardPopup() {
     if (newWindow) {
       console.log('✅ Dashboard aberto como popup! ID:', newWindow.id);
     } else {
-      console.log('❌ Falha ao abrir popup, tentando como aba...');
-      chrome.tabs.create({
-        url: dashboardUrl,
-        active: true
-      });
+      console.log('❌ Falha ao abrir popup');
+      chrome.tabs.create({ url: dashboardUrl, active: true });
     }
   });
 }
@@ -89,7 +102,6 @@ async function reloadAllScripts() {
     console.log('❌ Nenhuma aba do jogo encontrada');
     return false;
   }
-  
   for (const tab of tabs) {
     console.log(`🔄 Recarregando página ${tab.id}...`);
     await chrome.tabs.reload(tab.id);
@@ -106,14 +118,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   switch (message.action) {
     case 'getStatus':
       sendResponse({ 
-        isRunning: botActive,  // ← Usa botActive em vez de isRunning
-        selectedHunt: 'folda-hunt', 
-        selectedPull: 'Agressivo',
-        blockedItems: [],
-        huntEnabled: true,
-        sellEnabled: true,
-        partyEnabled: true,
-        partyMode: 'solo'
+        ...BOT_STATE,
+        isRunning: botActive
       });
       break;
 
@@ -146,25 +152,38 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       });
       return true;
 
-    case 'getHunts':
-    case 'updateConfig':
     case 'toggleModule':
+      const moduleKey = `${message.module}Enabled`;
+      BOT_STATE[moduleKey] = !BOT_STATE[moduleKey];
+      const isEnabled = BOT_STATE[moduleKey];
+      console.log(`🔄 ${message.module} agora está ${isEnabled ? 'ATIVO' : 'INATIVO'}`);
+      sendToContent({ action: 'toggleModule', module: message.module, enabled: isEnabled });
+      sendResponse({ success: true, enabled: isEnabled });
+      break;
+
+    case 'updateConfig':
+      Object.assign(BOT_STATE, message.config);
+      sendToContent({ action: 'updateConfig', config: message.config });
+      sendResponse({ success: true });
+      break;
+
     case 'setBlockedItems':
+      BOT_STATE.blockedItems = message.items;
+      sendToContent({ action: 'setBlockedItems', items: message.items });
+      sendResponse({ success: true });
+      break;
+
     case 'forceSell':
+      sendToContent({ action: 'forceSell' });
+      sendResponse({ success: true });
+      break;
+
     case 'startHunt':
-      // Encaminha para o content script
-      chrome.tabs.query({ url: 'https://huntera.com.br/game' }, (tabs) => {
-        if (tabs.length > 0) {
-          chrome.tabs.sendMessage(tabs[0].id, message);
-        } else {
-          console.warn('⚠️ Nenhuma aba do jogo encontrada');
-        }
-      });
+      sendToContent({ action: 'startHunt' });
       sendResponse({ success: true });
       break;
 
     default:
-      console.warn('⚠️ Ação desconhecida:', message.action);
       sendResponse({ error: 'Ação desconhecida' });
   }
 
@@ -185,9 +204,8 @@ function sendToContent(message) {
 }
 
 // ============================================================
-// CARREGAR ESTADO AO INICIAR
+// INICIALIZAR
 // ============================================================
 loadBotState();
-
 console.log('✅ Background service worker pronto!');
 console.log(`📊 Bot iniciará ${botActive ? 'ATIVO' : 'DESATIVADO'} por padrão`);

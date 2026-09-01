@@ -32,12 +32,8 @@ class SellModule extends HunteraModule {
     this.log('Módulo Venda inicializado', 'info');
   }
 
-  // ============================================================
-  // ABRIR JANELA DE VENDA
-  // ============================================================
   async openSellWindow() {
     this.log('Abrindo janela de venda...');
-    
     let sellBtn = this.findElement(this.selectors.sellBtn);
     if (!sellBtn) {
       const buttons = document.querySelectorAll('button');
@@ -48,34 +44,24 @@ class SellModule extends HunteraModule {
         }
       }
     }
-
     if (!sellBtn) {
       this.log('Botão de venda não encontrado', 'warn');
       return false;
     }
-
-    // Verifica se tem itens
     if (!sellBtn.classList.contains('has-items')) {
       this.log('Nenhum item para vender');
       return false;
     }
-
     if (this.safeClick(sellBtn)) {
       await this.delay(800);
       this.log('✅ Janela de venda aberta');
       return true;
     }
-
     return false;
   }
 
-  // ============================================================
-  // FECHAR JANELA DE VENDA
-  // ============================================================
   async closeSellWindow() {
     this.log('Fechando janela de venda...');
-    
-    // Tenta fechar pelo botão Cancelar
     const cancelBtn = this.findElement(this.selectors.sellCancel);
     if (cancelBtn && cancelBtn.offsetParent !== null) {
       if (this.safeClick(cancelBtn)) {
@@ -83,8 +69,6 @@ class SellModule extends HunteraModule {
         return true;
       }
     }
-
-    // Tenta fechar pelo X
     const closeBtns = document.querySelectorAll('.quick-sell-close, .close, [aria-label="Fechar"]');
     for (const btn of closeBtns) {
       if (btn.offsetParent !== null) {
@@ -94,32 +78,21 @@ class SellModule extends HunteraModule {
         }
       }
     }
-
     return false;
   }
 
-  // ============================================================
-  // OBTER ITENS DA JANELA
-  // ============================================================
   getItems() {
     const items = [];
     const rows = this.findElements(this.selectors.sellRow);
-
     for (const row of rows) {
       if (row.offsetParent === null) continue;
-
       try {
         const nameEl = row.querySelector(this.selectors.sellName);
         const name = nameEl ? nameEl.textContent.trim() : '';
         const classes = row.className || '';
-        
-        // Verifica se está marcado (para venda)
         const marked = classes.includes('marked');
-        // Verifica se está equipado
         const equipped = classes.includes('equipped');
-        // Pega o ID do item
         const itemId = row.getAttribute('data-item-id') || '';
-
         if (name) {
           items.push({ 
             element: row, 
@@ -134,14 +107,10 @@ class SellModule extends HunteraModule {
         console.debug('Erro ao processar item:', e);
       }
     }
-
     this.log(`📦 ${items.length} itens encontrados`);
     return items;
   }
 
-  // ============================================================
-  // VERIFICAR SE ITEM ESTÁ BLOQUEADO
-  // ============================================================
   isItemBlocked(itemName) {
     if (!itemName) return false;
     return this.config.blockedItems.some(b => 
@@ -149,9 +118,6 @@ class SellModule extends HunteraModule {
     );
   }
 
-  // ============================================================
-  // MARCAR/DESMARCAR ITEM
-  // ============================================================
   markItem(item, mark = true) {
     try {
       const isMarked = item.classList.contains('marked');
@@ -172,29 +138,19 @@ class SellModule extends HunteraModule {
     }
   }
 
-  // ============================================================
-  // VENDA RÁPIDA (LÓGICA CORRETA)
-  // ============================================================
   async quickSell() {
     if (this._isSelling) {
       this.log('Já está vendendo...', 'warn');
       return false;
     }
-
     this._isSelling = true;
-
     try {
       this.log('🔄 Iniciando venda rápida...');
-
-      // Abre a janela
       if (!await this.openSellWindow()) {
         this._isSelling = false;
         return false;
       }
-
       await this.delay(500);
-
-      // Obtém os itens
       const items = this.getItems();
       if (!items.length) {
         this.log('Nenhum item encontrado');
@@ -202,59 +158,35 @@ class SellModule extends HunteraModule {
         this._isSelling = false;
         return true;
       }
-
       let markedCount = 0;
       let blockedCount = 0;
       let equippedCount = 0;
-
-      // ============================================================
-      // LÓGICA DE MARCAÇÃO:
-      // - Itens BLOQUEADOS → DESMARCAR (não vender)
-      // - Itens EQUIPADOS → DESMARCAR (não vender)
-      // - Itens NÃO bloqueados e NÃO equipados → MARCAR (vender)
-      // ============================================================
-      
       for (const item of items) {
-        // Se for bloqueado → DESMARCAR
         if (this.isItemBlocked(item.name)) {
-          if (item.marked) {
-            this.markItem(item.element, false);
-          }
+          if (item.marked) this.markItem(item.element, false);
           blockedCount++;
           continue;
         }
-
-        // Se for equipado → DESMARCAR
         if (this.config.ignoreEquipped && item.equipped) {
-          if (item.marked) {
-            this.markItem(item.element, false);
-          }
+          if (item.marked) this.markItem(item.element, false);
           equippedCount++;
           continue;
         }
-
-        // Se NÃO estiver marcado → MARCAR (vender)
         if (!item.marked) {
           this.markItem(item.element, true);
           markedCount++;
           await this.delay(100);
         } else {
-          // Já está marcado, manter
           markedCount++;
         }
       }
-
       this.log(`📊 Resumo: ${markedCount} para vender, ${blockedCount} bloqueados, ${equippedCount} equipados`);
-
-      // Se não tem itens para vender
       if (markedCount === 0) {
         this.log('Nenhum item para vender');
         await this.closeSellWindow();
         this._isSelling = false;
         return true;
       }
-
-      // Procura botão de confirmar
       let confirmBtn = this.findElement(this.selectors.sellConfirm);
       if (!confirmBtn) {
         const buttons = document.querySelectorAll('.quick-sell-confirm, button');
@@ -265,15 +197,12 @@ class SellModule extends HunteraModule {
           }
         }
       }
-
       if (!confirmBtn || confirmBtn.offsetParent === null) {
         this.log('Botão de confirmar não encontrado', 'warn');
         await this.closeSellWindow();
         this._isSelling = false;
         return false;
       }
-
-      // Confirma a venda
       this.log(`💰 Confirmando venda de ${markedCount} itens...`);
       if (this.safeClick(confirmBtn)) {
         await this.delay(1500);
@@ -283,11 +212,9 @@ class SellModule extends HunteraModule {
       } else {
         this.log('❌ Falha ao confirmar venda', 'warn');
       }
-
       await this.closeSellWindow();
       this._isSelling = false;
       return true;
-
     } catch (e) {
       this.log(`❌ Erro na venda: ${e.message}`, 'error');
       this._isSelling = false;
@@ -295,17 +222,11 @@ class SellModule extends HunteraModule {
     }
   }
 
-  // ============================================================
-  // FORÇAR VENDA
-  // ============================================================
   async forceSell() {
     this.log('💪 Forçando venda imediata...');
     return await this.quickSell();
   }
 
-  // ============================================================
-  // GERENCIAR ITENS BLOQUEADOS
-  // ============================================================
   addBlockedItem(itemName) {
     if (!itemName) return false;
     const normalized = itemName.trim();
@@ -345,15 +266,10 @@ class SellModule extends HunteraModule {
     return this.config.blockedItems || [];
   }
 
-  // ============================================================
-  // LOOP PRINCIPAL
-  // ============================================================
   async loop() {
     if (!this.isRunning()) return;
-
     const now = Date.now();
     if (now - this._lastSellTime < this.config.cooldown) return;
-
     if (this.config.autoSellOnCity) {
       const huntModule = window.huntModule;
       if (huntModule && huntModule.isInCity()) {

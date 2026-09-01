@@ -8,9 +8,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   console.log('🔵 Popup carregado!');
 
-  // ============================================================
-  // FUNÇÃO PARA ATUALIZAR STATUS
-  // ============================================================
   function updateStatus() {
     chrome.runtime.sendMessage({ action: 'getStatus' }, (response) => {
       console.log('📊 Status recebido:', response);
@@ -24,9 +21,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // ============================================================
-  // INICIAR/PARAR BOT
-  // ============================================================
   startBtn.addEventListener('click', () => {
     console.log('🔘 Botão Start/Stop clicado');
     chrome.runtime.sendMessage({ action: 'getStatus' }, (response) => {
@@ -40,9 +34,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // ============================================================
-  // ABRIR DASHBOARD COMO POPUP - MÚLTIPLAS TENTATIVAS
-  // ============================================================
   dashboardBtn.addEventListener('click', () => {
     console.log('🔘 Botão Configuração clicado!');
     
@@ -50,54 +41,29 @@ document.addEventListener('DOMContentLoaded', () => {
     
     dashboardBtn.textContent = '⏳ Abrindo...';
     dashboardBtn.disabled = true;
-
-    // Tentativa 1: Abrir via background
+    
     chrome.runtime.sendMessage({ action: 'openDashboardPopup' }, (response) => {
       console.log('📨 Resposta do background:', response);
       
+      dashboardBtn.textContent = '⚙️ Abrir Configuração';
+      dashboardBtn.disabled = false;
+      
       if (response && response.success) {
-        // Fecha o popup atual
         setTimeout(() => {
           window.close();
         }, 300);
-        return;
-      }
-
-      // Tentativa 2: Abrir diretamente com chrome.windows.create
-      console.log('🔄 Tentando abrir diretamente...');
-      chrome.windows.create({
-        url: chrome.runtime.getURL('dashboard/dashboard.html'),
-        type: 'popup',
-        width: 500,
-        height: 650,
-        focused: true
-      }, (newWindow) => {
-        dashboardBtn.textContent = '⚙️ Abrir Configuração';
-        dashboardBtn.disabled = false;
-        
-        if (newWindow) {
-          console.log('✅ Dashboard aberto como popup!');
-          setTimeout(() => {
-            window.close();
-          }, 300);
-        } else {
-          // Tentativa 3: Abrir em nova aba (fallback)
-          console.log('🔄 Fallback: abrindo em nova aba...');
-          chrome.tabs.create({
-            url: chrome.runtime.getURL('dashboard/dashboard.html'),
-            active: true
-          }, () => {
-            console.log('✅ Dashboard aberto em nova aba!');
-            window.close();
-          });
+      } else {
+        if (errorMsg) {
+          errorMsg.style.display = 'block';
+          errorMsg.textContent = '❌ Erro ao abrir! Clique novamente.';
         }
-      });
+        setTimeout(() => {
+          if (errorMsg) errorMsg.style.display = 'none';
+        }, 3000);
+      }
     });
   });
 
-  // ============================================================
-  // ATUALIZA STATUS A CADA 3 SEGUNDOS
-  // ============================================================
   updateStatus();
   setInterval(updateStatus, 3000);
 });

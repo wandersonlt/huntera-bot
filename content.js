@@ -2,75 +2,19 @@
 console.log('🔌 Content script carregado!');
 
 // ============================================================
-// VERIFICAR SE OS SCRIPTS JÁ FORAM CARREGADOS
+// VERIFICAR SE O INJECT JÁ FOI CARREGADO
 // ============================================================
-if (window.__hunteraBotLoaded) {
-  console.log('⏭️ Scripts já carregados, ignorando...');
-} else {
+if (!window.__hunteraBotLoaded) {
   window.__hunteraBotLoaded = true;
   
-  // ============================================================
-  // LISTA DE SCRIPTS PARA CARREGAR
-  // ============================================================
-  const scriptsToLoad = [
-    'data/items.js',
-    'modules/base.js',
-    'modules/hunt.js',
-    'modules/sell.js',
-    'modules/party.js',
-    'inject.js'
-  ];
-  
-  let loadedCount = 0;
-  const totalScripts = scriptsToLoad.length;
-  
-  // ============================================================
-  // FUNÇÃO PARA CARREGAR UM SCRIPT
-  // ============================================================
-  function loadScript(src, callback) {
-    console.log(`📥 Carregando: ${src}`);
-    const script = document.createElement('script');
-    script.src = chrome.runtime.getURL(src);
-    script.onload = () => {
-      loadedCount++;
-      console.log(`✅ [${loadedCount}/${totalScripts}] Carregado: ${src}`);
-      if (callback) callback();
-    };
-    script.onerror = () => {
-      loadedCount++;
-      console.error(`❌ [${loadedCount}/${totalScripts}] Erro ao carregar: ${src}`);
-      if (callback) callback();
-    };
-    document.documentElement.appendChild(script);
-  }
-  
-  // ============================================================
-  // CARREGAR TODOS OS SCRIPTS EM SEQUÊNCIA
-  // ============================================================
-  function loadNextScript(index) {
-    if (index >= totalScripts) {
-      console.log(`✅ Todos os ${totalScripts} scripts carregados!`);
-      console.log('📦 Verificando classes:');
-      console.log('  HuntModule:', typeof window.HuntModule);
-      console.log('  SellModule:', typeof window.SellModule);
-      console.log('  PartyModule:', typeof window.PartyModule);
-      console.log('  ALL_ITEMS:', window.ALL_ITEMS?.length || 0);
-      return;
-    }
-    
-    loadScript(scriptsToLoad[index], () => {
-      // Aguarda um pouco antes de carregar o próximo
-      setTimeout(() => {
-        loadNextScript(index + 1);
-      }, 200);
-    });
-  }
-  
-  // ============================================================
-  // INICIAR CARREGAMENTO
-  // ============================================================
-  console.log(`📦 Carregando ${totalScripts} scripts...`);
-  loadNextScript(0);
+  const script = document.createElement('script');
+  script.src = chrome.runtime.getURL('inject.js');
+  script.onload = () => {
+    console.log('✅ Inject script carregado via content!');
+  };
+  document.documentElement.appendChild(script);
+} else {
+  console.log('⏭️ Inject script já carregado, ignorando...');
 }
 
 // ============================================================
@@ -95,7 +39,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 window.addEventListener('message', (event) => {
   if (event.data.source === 'huntera-bot-inject') {
     console.log('📤 Content enviando para background:', event.data);
-    
     chrome.runtime.sendMessage({
       from: 'content',
       action: event.data.action,

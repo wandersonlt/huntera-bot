@@ -31,9 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let ALL_ITEMS = [];
   let BLOCKED_ITEMS = [];
   let CATEGORIES = [];
-  let HUNTS = [];
 
-  // ============ HUNTS (52) ============
   const HUNTS_LIST = [
     { id: 'rat-hunt', title: 'Rat Cellars', monster: 'Rat' },
     { id: 'spider-hunt', title: 'Spider Nest', monster: 'Spider' },
@@ -89,7 +87,6 @@ document.addEventListener('DOMContentLoaded', () => {
     { id: 'hell-hub-hunt', title: 'Hell Hub', monster: 'Demon, Vexclaw, Grimeleech, Hellflayer' }
   ];
 
-  // ============ FUNÇÕES DE LOG E STATUS ============
   function addLog(message, type = 'info') {
     const div = document.createElement('div');
     div.className = type;
@@ -120,7 +117,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // ============ CARREGAR DADOS ============
   function populateHunts() {
     huntSelect.innerHTML = '';
     HUNTS_LIST.forEach(hunt => {
@@ -140,8 +136,6 @@ document.addEventListener('DOMContentLoaded', () => {
       addLog(`📦 ${ALL_ITEMS.length} itens carregados`);
       return true;
     }
-
-    // Fallback
     ALL_ITEMS = [
       'Espada Curta', 'Espada Longa', 'Machado Curto', 'Machado Longo',
       'Arco Curto', 'Arco Longo', 'Besta', 'Bastão', 'Adaga', 'Lança',
@@ -169,7 +163,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // ============ ITENS BLOQUEADOS ============
   function renderBlockedItems(items) {
     BLOCKED_ITEMS = items || [];
     blockedItemsList.innerHTML = '';
@@ -200,62 +193,45 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // ============================================================
-  // 🔧 BUSCA DE ITENS (Case Insensitive + Busca Parcial)
-  // ============================================================
   function searchItems(query) {
     if (!query || query.length === 0) {
       itemSearchResults.innerHTML = '';
       return [];
     }
-    
     const searchTerm = query.trim();
-    
-    // Usa a função global se disponível
     if (window.searchItems) {
-      const results = window.searchItems(searchTerm);
-      return results;
+      return window.searchItems(searchTerm);
     }
-    
-    // Fallback
     const q = searchTerm.toLowerCase();
-    const results = ALL_ITEMS.filter(item => 
-      item.toLowerCase().includes(q)
-    );
-    
-    return results;
+    return ALL_ITEMS.filter(item => item.toLowerCase().includes(q));
   }
 
-  // ============================================================
-  // 🔧 AUTOCOMPLETE COM SUGESTÕES
-  // ============================================================
   function showAutocompleteSuggestions(query) {
     if (!query || query.length === 0) {
       itemSearchResults.innerHTML = '';
       return;
     }
-    
     const searchTerm = query.trim();
     let results = [];
-    
     if (window.autocompleteItems) {
-      results = window.autocompleteItems(searchTerm, 20);
+      results = window.autocompleteItems(searchTerm, 100);
     } else {
-      results = searchItems(searchTerm).slice(0, 20);
+      results = searchItems(searchTerm);
     }
-    
     if (!results || results.length === 0) {
       itemSearchResults.innerHTML = '<span style="color: #8b949e;font-size:12px;">🔍 Nenhum item encontrado</span>';
       return;
     }
-    
-    const html = results.map(item => 
+    const displayResults = results.slice(0, 100);
+    const html = displayResults.map(item => 
       `<span style="display:inline-block;padding:4px 10px;margin:3px;background:#21262d;border:1px solid #30363d;border-radius:4px;cursor:pointer;font-size:12px;" data-item="${item}">${item}</span>`
     ).join(' ');
-    
     itemSearchResults.innerHTML = html;
-    itemSearchResults.innerHTML += `<div style="margin-top:4px;font-size:11px;color:#8b949e;">${results.length} resultados encontrados</div>`;
-    
+    if (results.length > 100) {
+      itemSearchResults.innerHTML += `<div style="margin-top:4px;font-size:11px;color:#8b949e;">${results.length} resultados encontrados (mostrando 100)</div>`;
+    } else {
+      itemSearchResults.innerHTML += `<div style="margin-top:4px;font-size:11px;color:#8b949e;">${results.length} resultados encontrados</div>`;
+    }
     itemSearchResults.querySelectorAll('[data-item]').forEach(el => {
       el.addEventListener('click', () => {
         const itemName = el.dataset.item;
@@ -266,23 +242,17 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // ============================================================
-  // 🔧 ADICIONAR ITEM BLOQUEADO
-  // ============================================================
   function addBlockedItem(itemName) {
     if (!itemName || itemName.trim() === '') {
       addLog('⚠️ Digite um nome de item', 'warn');
       return;
     }
-    
     const item = itemName.trim();
-    
     const exists = BLOCKED_ITEMS.some(b => b.toLowerCase() === item.toLowerCase());
     if (exists) {
       addLog(`⚠️ Item já está bloqueado: ${item}`, 'warn');
       return;
     }
-    
     const newItems = [...BLOCKED_ITEMS, item];
     chrome.runtime.sendMessage({ action: 'setBlockedItems', items: newItems }, () => {
       renderBlockedItems(newItems);
@@ -292,9 +262,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // ============ EVENT LISTENERS ============
-
-  // Tabs
+  // ============ TABS ============
   tabs.forEach(tab => {
     tab.addEventListener('click', () => {
       tabs.forEach(t => t.classList.remove('active'));
@@ -304,7 +272,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Hunt Select
+  // ============ HUNT SELECT ============
   huntSelect.addEventListener('change', () => {
     const huntId = huntSelect.value;
     const hunt = HUNTS_LIST.find(h => h.id === huntId);
@@ -317,7 +285,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Pull Select
+  // ============ PULL SELECT ============
   pullSelect.addEventListener('change', () => {
     const pull = pullSelect.value;
     chrome.runtime.sendMessage({
@@ -329,7 +297,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Party Mode
+  // ============ PARTY MODE ============
   partyModeSelect.addEventListener('change', () => {
     const mode = partyModeSelect.value;
     chrome.runtime.sendMessage({
@@ -341,23 +309,21 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Force Sell
+  // ============ FORCE SELL ============
   forceSellBtn.addEventListener('click', () => {
     chrome.runtime.sendMessage({ action: 'forceSell' }, () => {
       addLog('💰 Forçando venda...');
     });
   });
 
-  // Reload Scripts
+  // ============ RELOAD SCRIPTS ============
   reloadBtn.addEventListener('click', () => {
     reloadBtn.textContent = '⏳';
     reloadBtn.disabled = true;
     addLog('🔄 Recarregando scripts do GitHub...');
-    
     chrome.runtime.sendMessage({ action: 'reloadScripts' }, (response) => {
       reloadBtn.textContent = '🔄';
       reloadBtn.disabled = false;
-      
       if (response && response.success) {
         addLog('✅ Scripts recarregados do GitHub!');
         setTimeout(() => {
@@ -370,51 +336,57 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Toggle Modules
+  // ============ TOGGLE MODULES ============
   toggleHuntBtn.addEventListener('click', () => {
-    chrome.runtime.sendMessage({ action: 'toggleModule', module: 'hunt' }, (response) => {
-      const enabled = response?.enabled;
-      toggleHuntBtn.textContent = enabled ? '🟢 Ativo' : '🔴 Desativado';
-      toggleHuntBtn.style.background = enabled ? '' : '#da3633';
-      addLog(`🏹 Módulo Hunt ${enabled ? 'ativado' : 'desativado'}`);
+    const isCurrentlyActive = toggleHuntBtn.textContent.includes('🟢');
+    const newState = !isCurrentlyActive;
+    toggleHuntBtn.textContent = newState ? '🟢 Ativo' : '🔴 Desativado';
+    toggleHuntBtn.style.background = newState ? '' : '#da3633';
+    chrome.runtime.sendMessage({ action: 'toggleModule', module: 'hunt', enabled: newState }, (response) => {
+      if (response && response.success) {
+        addLog(`🏹 Módulo Hunt ${newState ? 'ativado' : 'desativado'}`);
+      } else {
+        toggleHuntBtn.textContent = isCurrentlyActive ? '🟢 Ativo' : '🔴 Desativado';
+        toggleHuntBtn.style.background = isCurrentlyActive ? '' : '#da3633';
+        addLog('❌ Falha ao alternar módulo Hunt', 'error');
+      }
     });
   });
 
   toggleSellBtn.addEventListener('click', () => {
-    chrome.runtime.sendMessage({ action: 'toggleModule', module: 'sell' }, (response) => {
-      const enabled = response?.enabled;
-      toggleSellBtn.textContent = enabled ? '🟢 Ativo' : '🔴 Desativado';
-      toggleSellBtn.style.background = enabled ? '' : '#da3633';
-      addLog(`💰 Módulo Venda ${enabled ? 'ativado' : 'desativado'}`);
+    const isCurrentlyActive = toggleSellBtn.textContent.includes('🟢');
+    const newState = !isCurrentlyActive;
+    toggleSellBtn.textContent = newState ? '🟢 Ativo' : '🔴 Desativado';
+    toggleSellBtn.style.background = newState ? '' : '#da3633';
+    chrome.runtime.sendMessage({ action: 'toggleModule', module: 'sell', enabled: newState }, (response) => {
+      if (response && response.success) {
+        addLog(`💰 Módulo Venda ${newState ? 'ativado' : 'desativado'}`);
+      }
     });
   });
 
   togglePartyBtn.addEventListener('click', () => {
-    chrome.runtime.sendMessage({ action: 'toggleModule', module: 'party' }, (response) => {
-      const enabled = response?.enabled;
-      togglePartyBtn.textContent = enabled ? '🟢 Ativo' : '🔴 Desativado';
-      togglePartyBtn.style.background = enabled ? '' : '#da3633';
-      addLog(`👥 Módulo Party ${enabled ? 'ativado' : 'desativado'}`);
+    const isCurrentlyActive = togglePartyBtn.textContent.includes('🟢');
+    const newState = !isCurrentlyActive;
+    togglePartyBtn.textContent = newState ? '🟢 Ativo' : '🔴 Desativado';
+    togglePartyBtn.style.background = newState ? '' : '#da3633';
+    chrome.runtime.sendMessage({ action: 'toggleModule', module: 'party', enabled: newState }, (response) => {
+      if (response && response.success) {
+        addLog(`👥 Módulo Party ${newState ? 'ativado' : 'desativado'}`);
+      }
     });
   });
 
-  // ============================================================
-  // 🔧 ITEMS - BUSCA COM AUTOCOMPLETE
-  // ============================================================
+  // ============ ITEMS SEARCH ============
   let searchTimeout = null;
 
   itemSearch.addEventListener('input', function() {
     const query = this.value.trim();
-    
-    if (searchTimeout) {
-      clearTimeout(searchTimeout);
-    }
-    
+    if (searchTimeout) clearTimeout(searchTimeout);
     if (query.length === 0) {
       itemSearchResults.innerHTML = '';
       return;
     }
-    
     searchTimeout = setTimeout(() => {
       showAutocompleteSuggestions(query);
     }, 300);
@@ -433,7 +405,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Clear Items
+  // ============ CLEAR ITEMS ============
   clearItemsBtn.addEventListener('click', () => {
     chrome.runtime.sendMessage({ action: 'setBlockedItems', items: [] }, () => {
       renderBlockedItems([]);
@@ -441,7 +413,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Export Items
+  // ============ EXPORT ITEMS ============
   exportItemsBtn.addEventListener('click', () => {
     const data = JSON.stringify(BLOCKED_ITEMS, null, 2);
     const blob = new Blob([data], { type: 'application/json' });
@@ -454,7 +426,7 @@ document.addEventListener('DOMContentLoaded', () => {
     addLog(`📤 Itens exportados: ${BLOCKED_ITEMS.length} itens`);
   });
 
-  // Import Items
+  // ============ IMPORT ITEMS ============
   importItemsBtn.addEventListener('click', () => {
     const input = document.createElement('input');
     input.type = 'file';
@@ -484,12 +456,12 @@ document.addEventListener('DOMContentLoaded', () => {
     input.click();
   });
 
-  // Close
+  // ============ CLOSE ============
   document.getElementById('closeBtn').addEventListener('click', () => {
     window.close();
   });
 
-  // Checkboxes
+  // ============ CHECKBOXES ============
   ['autoStart', 'retryOnFail', 'ignoreEquipped', 'autoSell', 'acceptInvite', 'acceptHunt', 'acceptCostShare', 'followLeader'].forEach(id => {
     const el = document.getElementById(id);
     if (el) {
@@ -501,7 +473,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Cooldown
+  // ============ COOLDOWN ============
   document.getElementById('cooldownSelect').addEventListener('change', function() {
     chrome.runtime.sendMessage({
       action: 'updateConfig',
@@ -509,8 +481,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // ============ INICIALIZAÇÃO ============
-
+  // ============ INITIALIZATION ============
   loadItems();
   populateHunts();
 
@@ -531,14 +502,17 @@ document.addEventListener('DOMContentLoaded', () => {
       
       document.getElementById('cooldownSelect').value = response.sellCooldown || 10000;
       
-      toggleHuntBtn.textContent = response.huntEnabled !== false ? '🟢 Ativo' : '🔴 Desativado';
-      toggleHuntBtn.style.background = response.huntEnabled !== false ? '' : '#da3633';
+      const huntEnabled = response.huntEnabled !== false;
+      toggleHuntBtn.textContent = huntEnabled ? '🟢 Ativo' : '🔴 Desativado';
+      toggleHuntBtn.style.background = huntEnabled ? '' : '#da3633';
       
-      toggleSellBtn.textContent = response.sellEnabled !== false ? '🟢 Ativo' : '🔴 Desativado';
-      toggleSellBtn.style.background = response.sellEnabled !== false ? '' : '#da3633';
+      const sellEnabled = response.sellEnabled !== false;
+      toggleSellBtn.textContent = sellEnabled ? '🟢 Ativo' : '🔴 Desativado';
+      toggleSellBtn.style.background = sellEnabled ? '' : '#da3633';
       
-      togglePartyBtn.textContent = response.partyEnabled !== false ? '🟢 Ativo' : '🔴 Desativado';
-      togglePartyBtn.style.background = response.partyEnabled !== false ? '' : '#da3633';
+      const partyEnabled = response.partyEnabled !== false;
+      togglePartyBtn.textContent = partyEnabled ? '🟢 Ativo' : '🔴 Desativado';
+      togglePartyBtn.style.background = partyEnabled ? '' : '#da3633';
       
       renderBlockedItems(response.blockedItems || []);
     }

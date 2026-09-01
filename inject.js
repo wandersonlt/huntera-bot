@@ -10,10 +10,10 @@ if (window.__hunteraInjectLoaded) {
   window.__hunteraInjectLoaded = true;
   
   // ============================================================
-  // ESTADO DO BOT - INICIAR DESATIVADO
+  // ESTADO DO BOT
   // ============================================================
   let isRunning = false;
-  let botActive = false;  // ← MUDADO PARA false (desativado por padrão)
+  let botActive = false;
   
   // ============================================================
   // FUNÇÕES DE COMUNICAÇÃO
@@ -108,18 +108,23 @@ if (window.__hunteraInjectLoaded) {
           break;
 
         case 'toggleModule':
-          const modules = {
+          console.log(`🔄 Toggling module: ${data.module}, enabled: ${data.enabled}`);
+          const modulesMap = {
             hunt: window.huntModule,
             sell: window.sellModule,
             party: window.partyModule
           };
-          const module = modules[data.module];
-          if (module) {
+          const targetModule = modulesMap[data.module];
+          if (targetModule) {
             if (data.enabled) {
-              module.start();
+              targetModule.start();
+              console.log(`✅ ${data.module} iniciado`);
             } else {
-              module.stop();
+              targetModule.stop();
+              console.log(`⏹️ ${data.module} parado`);
             }
+            localStorage.setItem(`huntera_${data.module}_enabled`, JSON.stringify(data.enabled));
+            sendToExtension('moduleToggled', { module: data.module, enabled: data.enabled });
           }
           break;
       }
@@ -138,9 +143,8 @@ if (window.__hunteraInjectLoaded) {
     };
   }
 
-
   // ============================================================
-  // LOOP PRINCIPAL (com verificação de parada)
+  // LOOP PRINCIPAL
   // ============================================================
   async function startLoop() {
     if (!isRunning) {
@@ -148,7 +152,6 @@ if (window.__hunteraInjectLoaded) {
       return;
     }
     
-    // Verifica se deve parar
     const shouldStop = await shouldStopBot();
     if (shouldStop || !botActive) {
       console.log('⏹️ Bot desativado, parando loop...');
@@ -174,7 +177,6 @@ if (window.__hunteraInjectLoaded) {
       console.error('❌ Erro no loop:', e);
     }
     
-    // Continua o loop apenas se ainda estiver rodando
     if (isRunning && botActive) {
       setTimeout(startLoop, 2000);
     } else {
@@ -255,10 +257,6 @@ if (window.__hunteraInjectLoaded) {
       sell: () => window.sellModule,
       party: () => window.partyModule
     },
-    HuntModule: window.HuntModule,
-    SellModule: window.SellModule,
-    PartyModule: window.PartyModule,
-    ALL_ITEMS: window.ALL_ITEMS,
     searchItems: function(query) {
       if (!query || query.length === 0) return [];
       const q = query.toLowerCase();

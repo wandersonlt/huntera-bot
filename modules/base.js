@@ -45,10 +45,6 @@ class HunteraModule {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
-  async randomDelay(min, max) {
-    await this.delay(Math.floor(Math.random() * (max - min + 1)) + min);
-  }
-
   safeClick(element) {
     if (!element) return false;
     try {
