@@ -305,135 +305,126 @@ class HuntModule extends HunteraModule {
     await this.delay(500);
 
     // ============================================================
-    // CORREÇÃO: PROCURAR BOTÃO #hunt-start DE VÁRIAS FORMAS
+    // CORREÇÃO: GARANTIR QUE A JANELA E O BOTÃO ESTEJAM VISÍVEIS
     // ============================================================
-    this.log('🔍 Procurando botão #hunt-start...');
+    this.log('🔍 Verificando visibilidade da janela...');
     
-    let startBtn = null;
-    let attempts = 0;
-    const maxAttempts = 30;
-    
-    while (attempts < maxAttempts) {
-      // 1. Tentar pelo ID
-      startBtn = document.querySelector('#hunt-start');
-      if (startBtn) {
-        this.log(`✅ Botão #hunt-start encontrado por ID!`);
-        break;
+    // 1. Verificar se a janela de caçadas está visível
+    const huntWindow = document.querySelector('.hunt-window');
+    if (huntWindow) {
+      this.log('📐 Janela de caçadas encontrada');
+      // Forçar visibilidade
+      if (huntWindow.offsetParent === null) {
+        this.log('⚠️ Janela não está visível, forçando...');
+        huntWindow.style.display = 'block';
+        huntWindow.style.visibility = 'visible';
+        huntWindow.style.opacity = '1';
+        // Remover hidden
+        huntWindow.removeAttribute('hidden');
       }
-      
-      // 2. Tentar por texto exato
-      const buttons = document.querySelectorAll('.hunt-window button, .hunt-browser button, footer button');
-      for (const btn of buttons) {
-        const text = btn.textContent?.trim() || '';
-        if (text === 'Iniciar caçada' || text === 'Iniciar' || text.includes('Iniciar caçada')) {
-          startBtn = btn;
-          this.log(`✅ Botão encontrado por texto: "${text}"`);
-          break;
-        }
-      }
-      if (startBtn) break;
-      
-      // 3. Tentar qualquer botão com "Iniciar" dentro da janela
-      const allBtns = document.querySelectorAll('button');
-      for (const btn of allBtns) {
-        const text = btn.textContent?.trim() || '';
-        if (text.includes('Iniciar') && btn.offsetParent !== null) {
-          const parent = btn.closest('.hunt-window, .hunt-browser, footer');
-          if (parent) {
-            startBtn = btn;
-            this.log(`✅ Botão encontrado na janela: "${text}"`);
-            break;
-          }
-        }
-      }
-      if (startBtn) break;
-      
-      this.log(`⏳ Tentativa ${attempts + 1}/${maxAttempts}: botão não encontrado, aguardando...`);
-      attempts++;
-      await this.delay(500);
     }
-
-    // Se encontrou o botão, tenta clicar
-    if (startBtn) {
-      this.log(`✅ Botão encontrado! ID: ${startBtn.id || 'sem id'}, Texto: "${startBtn.textContent?.trim()}"`);
+    
+    // 2. Verificar o footer da janela
+    const footer = document.querySelector('.hunt-window footer, .hunt-browser footer');
+    if (footer) {
+      this.log('📐 Footer encontrado');
+      if (footer.offsetParent === null) {
+        this.log('⚠️ Footer não está visível, forçando...');
+        footer.style.display = 'flex';
+        footer.style.visibility = 'visible';
+      }
+    }
+    
+    // 3. Verificar se o botão existe
+    let startBtn = document.querySelector('#hunt-start');
+    if (!startBtn) {
+      this.log('❌ Botão #hunt-start não encontrado no DOM!', 'error');
+      return false;
+    }
+    
+    this.log(`✅ Botão #hunt-start encontrado: "${startBtn.textContent}"`);
+    
+    // 4. Forçar visibilidade do botão
+    if (startBtn.offsetParent === null) {
+      this.log('⚠️ Botão não está visível, forçando...');
+      startBtn.style.display = 'inline-block';
+      startBtn.style.visibility = 'visible';
+      startBtn.style.opacity = '1';
+      startBtn.removeAttribute('hidden');
+      // Forçar o container pai também
+      let parent = startBtn.parentElement;
+      while (parent && parent !== document.body) {
+        if (parent.offsetParent === null) {
+          parent.style.display = 'block';
+          parent.style.visibility = 'visible';
+        }
+        parent = parent.parentElement;
+      }
+    }
+    
+    // 5. Verificar se o botão está habilitado
+    if (startBtn.disabled) {
+      this.log('⚠️ Botão está desabilitado, tentando habilitar...');
+      startBtn.disabled = false;
+      startBtn.removeAttribute('disabled');
+    }
+    
+    // 6. Scroll para o botão
+    this.log('📜 Scroll para o botão...');
+    startBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    await this.delay(500);
+    
+    // 7. Verificar novamente a visibilidade após scroll
+    const rect = startBtn.getBoundingClientRect();
+    const isVisible = rect.width > 0 && rect.height > 0 && startBtn.offsetParent !== null;
+    this.log(`📊 Botão visível: ${isVisible}, posição: ${rect.top}, ${rect.left}`);
+    
+    // ============================================================
+    // TENTAR CLICAR
+    // ============================================================
+    if (isVisible && !startBtn.disabled) {
+      this.log('✅ Botão está visível e habilitado, clicando...');
       
-      // Verifica se está visível e habilitado
-      const isVisible = startBtn.offsetParent !== null;
-      const isEnabled = !startBtn.disabled;
-      
-      this.log(`📊 Status: visível=${isVisible}, habilitado=${isEnabled}`);
-      
-      if (!isVisible) {
-        this.log('⚠️ Botão não está visível, tentando tornar visível...');
-        startBtn.style.display = 'block';
-        startBtn.style.visibility = 'visible';
+      // Tenta diferentes formas de clique
+      try {
+        startBtn.click();
+        this.log('✅ Clique nativo executado!');
+        await this.delay(2000);
+        this._retryCount = 0;
+        this.emit('huntStarted', this.config.selectedHunt);
+        this.log('✅ Caçada iniciada!');
+        return true;
+      } catch (e) {
+        this.log(`⚠️ Clique nativo falhou: ${e.message}`);
       }
       
-      if (isEnabled) {
-        this.log('✅ Botão está habilitado, clicando...');
-        
-        // Scroll para o botão
-        startBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        await this.delay(300);
-        
-        // Tenta diferentes formas de clique
-        try {
-          startBtn.click();
-          this.log('✅ Clique nativo executado!');
-          await this.delay(2000);
-          this._retryCount = 0;
-          this.emit('huntStarted', this.config.selectedHunt);
-          this.log('✅ Caçada iniciada!');
-          return true;
-        } catch (e) {
-          this.log(`⚠️ Clique nativo falhou: ${e.message}`);
-        }
-        
-        try {
-          const clickEvent = new MouseEvent('click', {
-            view: window,
-            bubbles: true,
-            cancelable: true
-          });
-          startBtn.dispatchEvent(clickEvent);
-          this.log('✅ Evento dispatchado!');
-          await this.delay(2000);
-          this._retryCount = 0;
-          this.emit('huntStarted', this.config.selectedHunt);
-          this.log('✅ Caçada iniciada!');
-          return true;
-        } catch (e) {
-          this.log(`⚠️ Evento dispatch falhou: ${e.message}`);
-        }
-        
-        // Tenta via safeClick
-        if (this.safeClick(startBtn)) {
-          this.log('✅ safeClick executado!');
-          await this.delay(2000);
-          this._retryCount = 0;
-          this.emit('huntStarted', this.config.selectedHunt);
-          this.log('✅ Caçada iniciada!');
-          return true;
-        }
-      } else {
-        this.log('⚠️ Botão está desabilitado!', 'warn');
+      try {
+        const clickEvent = new MouseEvent('click', {
+          view: window,
+          bubbles: true,
+          cancelable: true
+        });
+        startBtn.dispatchEvent(clickEvent);
+        this.log('✅ Evento dispatchado!');
+        await this.delay(2000);
+        this._retryCount = 0;
+        this.emit('huntStarted', this.config.selectedHunt);
+        this.log('✅ Caçada iniciada!');
+        return true;
+      } catch (e) {
+        this.log(`⚠️ Evento dispatch falhou: ${e.message}`);
+      }
+      
+      if (this.safeClick(startBtn)) {
+        this.log('✅ safeClick executado!');
+        await this.delay(2000);
+        this._retryCount = 0;
+        this.emit('huntStarted', this.config.selectedHunt);
+        this.log('✅ Caçada iniciada!');
+        return true;
       }
     } else {
-      this.log('❌ Botão #hunt-start NÃO ENCONTRADO após 30 tentativas!', 'warn');
-      
-      // DEBUG: Listar todos os botões visíveis
-      this.log('🔍 DEBUG: Listando botões visíveis:');
-      const allBtns = document.querySelectorAll('button');
-      let count = 0;
-      for (const btn of allBtns) {
-        if (btn.offsetParent !== null) {
-          count++;
-          const text = btn.textContent?.trim() || '';
-          const id = btn.id || '';
-          this.log(`  ${count}. "${text}" (id: ${id}, disabled: ${btn.disabled})`);
-        }
-      }
-      this.log(`📊 Total de botões visíveis: ${count}`);
+      this.log(`⚠️ Botão não está clicável: visível=${isVisible}, disabled=${startBtn.disabled}`, 'warn');
     }
 
     // ============================================================
@@ -441,19 +432,26 @@ class HuntModule extends HunteraModule {
     // ============================================================
     this.log('🔍 Tentando botão #hunt-start-team...');
     let teamBtn = document.querySelector('#hunt-start-team');
-    if (teamBtn && !teamBtn.disabled && teamBtn.offsetParent !== null) {
-      this.log('✅ Clicando em "Iniciar com o time"');
-      teamBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      await this.delay(300);
-      try {
-        teamBtn.click();
-        await this.delay(2000);
-        this._retryCount = 0;
-        this.emit('huntStartedTeam', this.config.selectedHunt);
-        this.log('✅ Caçada iniciada com o time!');
-        return true;
-      } catch (e) {
-        this.log(`⚠️ Falha ao clicar no botão team: ${e.message}`);
+    if (teamBtn) {
+      // Forçar visibilidade
+      if (teamBtn.offsetParent === null) {
+        teamBtn.style.display = 'inline-block';
+        teamBtn.style.visibility = 'visible';
+      }
+      if (!teamBtn.disabled && teamBtn.offsetParent !== null) {
+        this.log('✅ Clicando em "Iniciar com o time"');
+        teamBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        await this.delay(300);
+        try {
+          teamBtn.click();
+          await this.delay(2000);
+          this._retryCount = 0;
+          this.emit('huntStartedTeam', this.config.selectedHunt);
+          this.log('✅ Caçada iniciada com o time!');
+          return true;
+        } catch (e) {
+          this.log(`⚠️ Falha ao clicar no botão team: ${e.message}`);
+        }
       }
     }
 
@@ -462,20 +460,41 @@ class HuntModule extends HunteraModule {
     // ============================================================
     this.log('🔍 Tentando botão #hunt-find-team...');
     let findTeamBtn = document.querySelector('#hunt-find-team');
-    if (findTeamBtn && !findTeamBtn.disabled && findTeamBtn.offsetParent !== null) {
-      this.log('✅ Clicando em "Completar o time"');
-      findTeamBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      await this.delay(300);
-      try {
-        findTeamBtn.click();
-        await this.delay(2000);
-        this._retryCount = 0;
-        this.emit('huntStarted', this.config.selectedHunt);
-        this.log('✅ Caçada iniciada com o time!');
-        return true;
-      } catch (e) {
-        this.log(`⚠️ Falha ao clicar no botão team: ${e.message}`);
+    if (findTeamBtn) {
+      if (findTeamBtn.offsetParent === null) {
+        findTeamBtn.style.display = 'inline-block';
+        findTeamBtn.style.visibility = 'visible';
       }
+      if (!findTeamBtn.disabled && findTeamBtn.offsetParent !== null) {
+        this.log('✅ Clicando em "Completar o time"');
+        findTeamBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        await this.delay(300);
+        try {
+          findTeamBtn.click();
+          await this.delay(2000);
+          this._retryCount = 0;
+          this.emit('huntStarted', this.config.selectedHunt);
+          this.log('✅ Caçada iniciada com o time!');
+          return true;
+        } catch (e) {
+          this.log(`⚠️ Falha ao clicar no botão team: ${e.message}`);
+        }
+      }
+    }
+
+    // ============================================================
+    // DEBUG: LISTAR TODOS OS BOTÕES DO FOOTER
+    // ============================================================
+    this.log('🔍 DEBUG: Botões do footer:');
+    const footerBtns = document.querySelectorAll('.hunt-window footer button, .hunt-browser footer button');
+    let count = 0;
+    for (const btn of footerBtns) {
+      count++;
+      const text = btn.textContent?.trim() || '';
+      const id = btn.id || '';
+      const visible = btn.offsetParent !== null;
+      const disabled = btn.disabled;
+      this.log(`  ${count}. "${text}" (id: ${id}, visível: ${visible}, disabled: ${disabled})`);
     }
 
     this.log('❌ Não foi possível iniciar a caçada', 'warn');
