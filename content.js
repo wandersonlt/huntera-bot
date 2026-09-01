@@ -19,10 +19,10 @@ if (!window.__hunteraBotLoaded) {
 }
 
 // ============================================================
-// ESCUTA MENSAGENS DO BACKGROUND
+// ESCUTA MENSAGENS
 // ============================================================
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  console.log('📨 Content recebeu do background:', message);
+  console.log('📨 Content recebeu:', message);
   
   window.postMessage({
     source: 'huntera-bot-extension',
@@ -34,13 +34,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   return true;
 });
 
-// ============================================================
-// ESCUTA MENSAGENS DO INJECT
-// ============================================================
 window.addEventListener('message', (event) => {
   if (event.data.source === 'huntera-bot-inject') {
-    console.log('📤 Content enviando para background:', event.data);
-    
     chrome.runtime.sendMessage({
       from: 'content',
       action: event.data.action,

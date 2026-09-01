@@ -1,4 +1,4 @@
-// background.js
+// background.js - VERIFIQUE SE ESTÁ ASSIM
 console.log('🔧 Background service worker carregado!');
 
 // ============================================================
@@ -7,22 +7,16 @@ console.log('🔧 Background service worker carregado!');
 const GITHUB_CONFIG = {
   owner: 'wandersonlt',
   repo: 'huntera-bot',
-  branch: 'main',
-  get rawUrl() {
-    return `https://raw.githubusercontent.com/${this.owner}/${this.repo}/${this.branch}/`;
-  }
+  branch: 'main'
 };
 
-console.log(`📦 GitHub: ${GITHUB_CONFIG.rawUrl}`);
-
 // ============================================================
-// DETECTAR PÁGINA DO JOGO - APENAS RECARREGAR A PÁGINA
+// DETECTAR PÁGINA DO JOGO - APENAS LOG
 // ============================================================
 chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   if (changeInfo.status === 'complete' && tab.url?.includes('huntera.com.br/game')) {
     console.log('🎯 Página do jogo detectada!');
-    // NÃO injeta nada aqui - o content script já faz isso!
-    // Só recarrega a página se necessário
+    // NÃO INJETA NADA AQUI - O CONTENT SCRIPT FAZ ISSO!
   }
 });
 
@@ -31,32 +25,13 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
 // ============================================================
 function openDashboardPopup() {
   console.log('🪟 Abrindo dashboard...');
-  const dashboardUrl = chrome.runtime.getURL('dashboard/dashboard.html');
-  
   chrome.windows.create({
-    url: dashboardUrl,
+    url: chrome.runtime.getURL('dashboard/dashboard.html'),
     type: 'popup',
     width: 500,
     height: 650,
     focused: true
   });
-}
-
-// ============================================================
-// RECARREGAR SCRIPTS - APENAS RECARREGA A PÁGINA
-// ============================================================
-async function reloadAllScripts() {
-  const tabs = await chrome.tabs.query({ url: 'https://huntera.com.br/game' });
-  if (tabs.length === 0) {
-    console.log('❌ Nenhuma aba do jogo encontrada');
-    return false;
-  }
-  
-  for (const tab of tabs) {
-    console.log(`🔄 Recarregando página ${tab.id}...`);
-    await chrome.tabs.reload(tab.id);
-  }
-  return true;
 }
 
 // ============================================================
@@ -67,27 +42,13 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
   switch (message.action) {
     case 'getStatus':
-      sendResponse({ 
-        isRunning: false, 
-        selectedHunt: 'rat-hunt', 
-        selectedPull: 'Cauteloso',
-        blockedItems: [],
-        huntEnabled: true,
-        sellEnabled: true,
-        partyEnabled: true
-      });
+      sendResponse({ isRunning: false, selectedHunt: 'rat-hunt', selectedPull: 'Cauteloso' });
       break;
 
     case 'openDashboardPopup':
       openDashboardPopup();
       sendResponse({ success: true });
       break;
-
-    case 'reloadScripts':
-      reloadAllScripts().then((result) => {
-        sendResponse({ success: result });
-      });
-      return true;
 
     case 'startBot':
     case 'stopBot':
@@ -96,7 +57,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     case 'setBlockedItems':
     case 'forceSell':
     case 'startHunt':
-      // Encaminha para o content script
       chrome.tabs.query({ url: 'https://huntera.com.br/game' }, (tabs) => {
         if (tabs.length > 0) {
           chrome.tabs.sendMessage(tabs[0].id, message);
