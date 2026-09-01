@@ -1,4 +1,4 @@
-// modules/sell.js - CORRIGIDO
+// modules/sell.js
 class SellModule extends HunteraModule {
   constructor() {
     super('Sell');
@@ -14,12 +14,11 @@ class SellModule extends HunteraModule {
       sellBtn: '.hud-quick-sell',
       sellWindow: '.quick-sell-window',
       sellRow: '.quick-sell-row',
-      sellItem: '.quick-sell-item',
-      sellName: '.quick-sell-name, strong, .item-name',
+      sellName: 'strong',
       sellMarked: '.marked',
       sellEquipped: '.equipped',
       sellConfirm: '.quick-sell-confirm',
-      sellClose: '.quick-sell-close, .close',
+      sellClose: '#quick-sell-close',
       hasItems: '.has-items'
     };
 
@@ -68,7 +67,7 @@ class SellModule extends HunteraModule {
       return true;
     }
 
-    const closeX = document.querySelector('.quick-sell-window .close, .modal-close, [aria-label="Fechar"]');
+    const closeX = document.querySelector('.quick-sell-window .close, .modal-close');
     if (closeX && this.safeClick(closeX)) {
       await this.delay(300);
       return true;
@@ -88,19 +87,11 @@ class SellModule extends HunteraModule {
         const nameEl = row.querySelector(this.selectors.sellName);
         const name = nameEl ? nameEl.textContent.trim() : '';
         const classes = row.className || '';
-        
-        // ⭐ CORREÇÃO: Verificar se está marcado ou equipado
         const marked = classes.includes('marked');
         const equipped = classes.includes('equipped');
 
         if (name) {
-          items.push({ 
-            element: row, 
-            name: name, 
-            marked: marked, 
-            equipped: equipped,
-            isBlocked: this.isItemBlocked(name)
-          });
+          items.push({ element: row, name, marked, equipped });
         }
       } catch (e) {
         console.debug('Erro ao processar item:', e);
@@ -135,7 +126,6 @@ class SellModule extends HunteraModule {
     }
   }
 
-  // ⭐ CORREÇÃO: Lógica invertida - vender itens NÃO bloqueados e NÃO equipados
   async quickSell() {
     if (this._isSelling) {
       this.log('Já está vendendo...', 'warn');
@@ -167,39 +157,26 @@ class SellModule extends HunteraModule {
       let equippedCount = 0;
 
       for (const item of items) {
-        // ⭐ Se for bloqueado → DESMARCAR (não vender)
-        if (item.isBlocked) {
-          if (item.marked) {
-            this.markItem(item.element, false);
-            this.log(`🚫 Desmarcando (bloqueado): ${item.name}`);
-          }
+        if (this.isItemBlocked(item.name)) {
+          if (item.marked) this.markItem(item.element, false);
           blockedCount++;
           continue;
         }
 
-        // ⭐ Se for equipado → DESMARCAR (não vender)
         if (this.config.ignoreEquipped && item.equipped) {
-          if (item.marked) {
-            this.markItem(item.element, false);
-            this.log(`🛡️ Desmarcando (equipado): ${item.name}`);
-          }
+          if (item.marked) this.markItem(item.element, false);
           equippedCount++;
           continue;
         }
 
-        // ⭐ Se NÃO estiver marcado → MARCAR PARA VENDER
         if (!item.marked) {
           this.markItem(item.element, true);
           markedCount++;
-          this.log(`✅ Marcando para vender: ${item.name}`);
           await this.delay(100);
-        } else {
-          // Já está marcado, manter
-          markedCount++;
         }
       }
 
-      this.log(`📊 Resumo: ${markedCount} itens para vender, ${blockedCount} bloqueados, ${equippedCount} equipados`);
+      this.log(`📊 ${markedCount} marcados, ${blockedCount} bloqueados, ${equippedCount} equipados`);
 
       if (markedCount === 0) {
         this.log('Nenhum item para vender');
@@ -208,7 +185,8 @@ class SellModule extends HunteraModule {
         return true;
       }
 
-      // Confirma a venda
+      this.log(`${markedCount} itens marcados para venda`);
+
       let confirmBtn = this.findElement(this.selectors.sellConfirm);
       if (!confirmBtn) {
         const buttons = document.querySelectorAll('.quick-sell-confirm, button');
@@ -220,21 +198,18 @@ class SellModule extends HunteraModule {
         }
       }
 
-      if (!confirmBtn || confirmBtn.offsetParent === null) {
+      if (!confirmBtn) {
         this.log('Botão de confirmar não encontrado', 'warn');
         await this.closeSellWindow();
         this._isSelling = false;
         return false;
       }
 
-      this.log('Confirmando venda...');
       if (this.safeClick(confirmBtn)) {
         await this.delay(1500);
         this._lastSellTime = Date.now();
         this.emit('itemsSold', markedCount);
         this.log(`✅ Venda concluída! ${markedCount} itens vendidos`);
-      } else {
-        this.log('❌ Falha ao confirmar venda', 'warn');
       }
 
       await this.closeSellWindow();

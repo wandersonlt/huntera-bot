@@ -1,4 +1,7 @@
-// background.js
+// ============================================================
+// BACKGROUND.JS - HUNTERA BOT
+// ============================================================
+
 const BOT_STATE = {
   isRunning: false,
   isHunting: false,
@@ -21,12 +24,50 @@ const BOT_STATE = {
   partyMode: 'solo'
 };
 
-console.log('🔧 Background service worker carregado!');
+// ============================================================
+// CONFIGURAÇÃO DO GITHUB
+// ============================================================
+const GITHUB_CONFIG = {
+  owner: 'wandersonlt',
+  repo: 'huntera-bot',
+  branch: 'main',
+  get rawUrl() {
+    return `https://raw.githubusercontent.com/${this.owner}/${this.repo}/${this.branch}/`;
+  }
+};
 
-// Injeta scripts na página
+console.log('🔧 Background service worker carregado!');
+console.log(`📦 GitHub: ${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}`);
+
+// ============================================================
+// CARREGAR SCRIPTS DO GITHUB
+// ============================================================
+async function loadScriptFromGitHub(filePath) {
+  const url = GITHUB_CONFIG.rawUrl + filePath;
+  console.log(`📥 Baixando: ${url}`);
+  
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+    const code = await response.text();
+    console.log(`✅ Carregado: ${filePath} (${code.length} bytes)`);
+    return code;
+  } catch (error) {
+    console.error(`❌ Erro ao carregar ${filePath}:`, error);
+    return null;
+  }
+}
+
+// ============================================================
+// INJETAR SCRIPTS
+// ============================================================
 async function injectScripts(tabId) {
   try {
-    const scripts = [
+    console.log('📦 Carregando scripts do GitHub...');
+    
+    const files = [
       'data/items.js',
       'modules/base.js',
       'modules/hunt.js',
@@ -34,23 +75,54 @@ async function injectScripts(tabId) {
       'modules/party.js',
       'inject.js'
     ];
-
-    for (const script of scripts) {
+    
+    const scripts = [];
+    for (const file of files) {
+      const code = await loadScriptFromGitHub(file);
+      if (code) {
+        scripts.push(code);
+      }
+    }
+    
+    if (scripts.length === 0) {
+      console.error('❌ Nenhum script carregado!');
+      return false;
+    }
+    
+    for (const code of scripts) {
       await chrome.scripting.executeScript({
         target: { tabId: tabId },
-        files: [script]
+        func: (codeToExecute) => {
+          try {
+            eval(codeToExecute);
+          } catch (e) {
+            console.error('Erro ao executar script:', e);
+          }
+        },
+        args: [code]
       });
     }
-
-    console.log('✅ Scripts injetados com sucesso!');
+    
+    console.log(`✅ ${scripts.length} scripts injetados do GitHub!`);
     return true;
+    
   } catch (error) {
     console.error('❌ Erro ao injetar scripts:', error);
     return false;
   }
 }
 
-// Detecta página do jogo
+// ============================================================
+// RECARREGAR SCRIPTS
+// ============================================================
+async function reloadScripts(tabId) {
+  console.log('🔄 Recarregando scripts do GitHub...');
+  return await injectScripts(tabId);
+}
+
+// ============================================================
+// DETECTAR PÁGINA DO JOGO
+// ============================================================
 chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   if (changeInfo.status === 'complete' && tab.url?.includes('huntera.com.br/game')) {
     console.log('🎯 Página do jogo detectada!');
@@ -58,19 +130,19 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   }
 });
 
-// ============ ABRIR POPUP (VERSÃO QUE FUNCIONOU NO TESTE) ============
+// ============================================================
+// ABRIR DASHBOARD COMO POPUP
+// ============================================================
 function openDashboardPopup() {
   console.log('🪟 Abrindo dashboard como POPUP...');
   
   const dashboardUrl = chrome.runtime.getURL('dashboard/dashboard.html');
   
-  // VERIFICA SE JÁ EXISTE UM POPUP ABERTO
   chrome.windows.getAll({ populate: true }, (windows) => {
     for (const win of windows) {
       if (win.type === 'popup') {
         for (const tab of win.tabs) {
           if (tab.url && tab.url.includes('dashboard/dashboard.html')) {
-            // Popup já existe, foca nele
             chrome.windows.update(win.id, { focused: true });
             console.log('✅ Popup já existente, focado!');
             return;
@@ -79,7 +151,6 @@ function openDashboardPopup() {
       }
     }
     
-    // CRIA NOVO POPUP (SEM USAR screen)
     chrome.windows.create({
       url: dashboardUrl,
       type: 'popup',
@@ -88,18 +159,19 @@ function openDashboardPopup() {
       focused: true
     }, (newWindow) => {
       if (newWindow) {
-        console.log('✅ POPUP CRIADO COM SUCESSO! ID:', newWindow.id);
+        console.log('✅ POPUP CRIADO! ID:', newWindow.id);
       } else {
         console.error('❌ FALHA AO CRIAR POPUP!');
-        console.log('Último erro:', chrome.runtime.lastError);
       }
     });
   });
 }
 
-// ============ ESCUTA MENSAGENS ============
+// ============================================================
+// ESCUTAR MENSAGENS
+// ============================================================
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  console.log('📨 Mensagem recebida no background:', message);
+  console.log('📨 Mensagem recebida:', message);
 
   switch (message.action) {
     case 'ping':
@@ -156,21 +228,32 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       sendResponse({ success: true });
       break;
 
-    // ============ ABRIR DASHBOARD ============
     case 'openDashboardPopup':
       openDashboardPopup();
       sendResponse({ success: true });
       break;
 
+    case 'reloadScripts':
+      chrome.tabs.query({ url: 'https://huntera.com.br/game' }, async (tabs) => {
+        if (tabs.length > 0) {
+          const result = await reloadScripts(tabs[0].id);
+          sendResponse({ success: result });
+        } else {
+          sendResponse({ success: false, error: 'Página do jogo não encontrada' });
+        }
+      });
+      return true;
+
     default:
-      console.log('⚠️ Ação desconhecida:', message.action);
       sendResponse({ error: 'Ação desconhecida' });
   }
 
   return true;
 });
 
-// Envia mensagem para o content script
+// ============================================================
+// ENVIAR MENSAGEM PARA CONTENT
+// ============================================================
 function sendToContent(message) {
   chrome.tabs.query({ url: 'https://huntera.com.br/game' }, (tabs) => {
     if (tabs.length > 0) {
@@ -181,12 +264,14 @@ function sendToContent(message) {
   });
 }
 
-// Escuta mensagens do content script
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.from === 'content') {
-    chrome.runtime.sendMessage(message);
+// ============================================================
+// CARREGAR CONFIGURAÇÃO SALVA
+// ============================================================
+chrome.storage.local.get(['githubConfig'], (result) => {
+  if (result.githubConfig) {
+    Object.assign(GITHUB_CONFIG, result.githubConfig);
+    console.log('📦 Configuração do GitHub carregada:', GITHUB_CONFIG);
   }
-  return true;
 });
 
 console.log('✅ Background service worker pronto!');

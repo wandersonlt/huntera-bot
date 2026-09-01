@@ -1,6 +1,5 @@
 // dashboard/dashboard.js
 document.addEventListener('DOMContentLoaded', () => {
-  // ============ REFERÊNCIAS ============
   const tabs = document.querySelectorAll('.tab');
   const tabContents = document.querySelectorAll('.tab-content');
   const logContainer = document.getElementById('logContainer');
@@ -19,6 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const toggleHuntBtn = document.getElementById('toggleHuntBtn');
   const toggleSellBtn = document.getElementById('toggleSellBtn');
   const togglePartyBtn = document.getElementById('togglePartyBtn');
+  const reloadBtn = document.getElementById('reloadBtn');
   const itemSearch = document.getElementById('itemSearch');
   const categoryFilter = document.getElementById('categoryFilter');
   const addItemBtn = document.getElementById('addItemBtn');
@@ -29,13 +29,13 @@ document.addEventListener('DOMContentLoaded', () => {
   const itemCount = document.getElementById('itemCount');
   const itemSearchResults = document.getElementById('itemSearchResults');
 
-  // ============ DADOS ============
   let ALL_ITEMS = [];
   let BLOCKED_ITEMS = [];
   let CATEGORIES = [];
+  let HUNTS = [];
 
   // ============ HUNTS (52) ============
-  const HUNTS = [
+  const HUNTS_LIST = [
     { id: 'rat-hunt', title: 'Rat Cellars', monster: 'Rat' },
     { id: 'spider-hunt', title: 'Spider Nest', monster: 'Spider' },
     { id: 'troll-hunt', title: 'Troll Hills', monster: 'Troll' },
@@ -90,7 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
     { id: 'hell-hub-hunt', title: 'Hell Hub', monster: 'Demon, Vexclaw, Grimeleech, Hellflayer' }
   ];
 
-  // ============ FUNÇÕES DE LOG ============
+  // ============ FUNÇÕES ============
   function addLog(message, type = 'info') {
     const div = document.createElement('div');
     div.className = type;
@@ -102,7 +102,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // ============ FUNÇÕES DE STATUS ============
   function updateStatus() {
     chrome.runtime.sendMessage({ action: 'getStatus' }, (response) => {
       if (response) {
@@ -112,21 +111,27 @@ document.addEventListener('DOMContentLoaded', () => {
         statusValue.textContent = isRunning ? '🟢 Online' : '🔴 Offline';
         
         const selectedHunt = response.selectedHunt || 'rat-hunt';
-        const hunt = HUNTS.find(h => h.id === selectedHunt);
+        const hunt = HUNTS_LIST.find(h => h.id === selectedHunt);
         huntValue.textContent = hunt ? hunt.title : 'Nenhuma';
         pullValue.textContent = response.selectedPull || 'Cauteloso';
         
         const mode = response.partyMode || 'solo';
         modeValue.textContent = mode === 'leader' ? 'Líder' : mode === 'member' ? 'Membro' : 'Solo';
-        
-        if (partyModeSelect.value !== mode) {
-          partyModeSelect.value = mode;
-        }
       }
     });
   }
 
-  // ============ FUNÇÕES DE ITENS ============
+  function populateHunts() {
+    huntSelect.innerHTML = '';
+    HUNTS_LIST.forEach(hunt => {
+      const option = document.createElement('option');
+      option.value = hunt.id;
+      option.textContent = `${hunt.title} (${hunt.monster})`;
+      huntSelect.appendChild(option);
+    });
+    addLog(`🏹 ${HUNTS_LIST.length} caçadas carregadas`);
+  }
+
   function loadItems() {
     if (window.ALL_ITEMS && window.ALL_ITEMS.length) {
       ALL_ITEMS = window.ALL_ITEMS;
@@ -137,33 +142,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Fallback
     ALL_ITEMS = [
-      'Espada Curta', 'Espada Longa', 'Espada de Ferro', 'Espada de Aço',
-      'Machado Curto', 'Machado Longo', 'Machado de Ferro', 'Machado de Aço',
-      'Arco Curto', 'Arco Longo', 'Arco de Ferro', 'Arco de Aço',
-      'Besta', 'Besta de Ferro', 'Besta de Aço',
-      'Bastão', 'Bastão de Ferro', 'Bastão de Aço',
-      'Adaga', 'Adaga de Ferro', 'Adaga de Aço',
-      'Lança', 'Lança de Ferro', 'Lança de Aço',
-      'Maça', 'Maça de Ferro', 'Maça de Aço',
-      'Martelo', 'Martelo de Ferro', 'Martelo de Aço',
-      'Cajado', 'Cajado de Ferro', 'Cajado de Aço',
-      'Escudo de Ferro', 'Escudo de Aço', 'Escudo de Mithril',
-      'Armadura de Ferro', 'Armadura de Aço', 'Armadura de Mithril',
-      'Capacete de Ferro', 'Capacete de Aço', 'Capacete de Mithril',
-      'Botas de Ferro', 'Botas de Aço', 'Botas de Mithril',
-      'Anel de Vida', 'Anel de Mana', 'Anel de Força',
-      'Amuleto de Proteção', 'Amuleto de Vida', 'Amuleto de Mana',
-      'Poção de Vida Pequena', 'Poção de Vida Média', 'Poção de Vida Grande',
-      'Poção de Mana Pequena', 'Poção de Mana Média', 'Poção de Mana Grande',
-      'Poção de Energia', 'Poção de Força', 'Poção de Regeneração',
-      'Runa de Fogo', 'Runa de Gelo', 'Runa de Energia', 'Runa de Cura',
-      'Flecha', 'Flecha de Fogo', 'Flecha de Gelo',
-      'Bolt', 'Bolt de Fogo', 'Bolt de Gelo',
-      'Machado de Madeira', 'Picareta', 'Enxada', 'Pá', 'Corda', 'Lanterna', 'Tocha',
-      'Bolsa', 'Bolsa de Couro', 'Mochila', 'Mochila Grande', 'Baú',
-      'Carne', 'Carne Assada', 'Pão', 'Queijo', 'Leite', 'Mel', 'Peixe',
-      'Minério de Ferro', 'Minério de Aço', 'Minério de Mithril',
-      'Moeda de Ouro', 'Moeda de Prata', 'Moeda de Cobre'
+      'Espada Curta', 'Espada Longa', 'Machado Curto', 'Machado Longo',
+      'Arco Curto', 'Arco Longo', 'Besta', 'Bastão', 'Adaga', 'Lança',
+      'Maça', 'Martelo', 'Cajado', 'Escudo de Ferro', 'Escudo de Aço',
+      'Armadura de Ferro', 'Armadura de Aço', 'Capacete de Ferro', 'Capacete de Aço',
+      'Botas de Ferro', 'Botas de Aço', 'Anel de Vida', 'Anel de Mana',
+      'Amuleto de Proteção', 'Poção de Vida Pequena', 'Poção de Mana Pequena',
+      'Runa de Fogo', 'Flecha', 'Bolt', 'Machado de Madeira', 'Picareta',
+      'Pá', 'Corda', 'Lanterna', 'Tocha', 'Bolsa', 'Mochila', 'Baú',
+      'Carne', 'Pão', 'Queijo', 'Leite', 'Mel', 'Peixe', 'Maçã', 'Pêra',
+      'Minério de Ferro', 'Minério de Aço', 'Moeda de Ouro', 'Moeda de Prata'
     ];
     CATEGORIES = ['armas', 'escudos', 'armaduras', 'capacetes', 'botas', 'aneis', 'amuletos', 'pocoes', 'runas', 'municao', 'ferramentas', 'containers', 'comida', 'mineiros', 'moedas'];
     populateCategories();
@@ -221,18 +209,6 @@ document.addEventListener('DOMContentLoaded', () => {
     return results.slice(0, 20);
   }
 
-  // ============ POPULAR HUNTS ============
-  function populateHunts() {
-    huntSelect.innerHTML = '';
-    HUNTS.forEach(hunt => {
-      const option = document.createElement('option');
-      option.value = hunt.id;
-      option.textContent = `${hunt.title} (${hunt.monster})`;
-      huntSelect.appendChild(option);
-    });
-    addLog(`🏹 ${HUNTS.length} caçadas carregadas`);
-  }
-
   // ============ EVENT LISTENERS ============
 
   // Tabs
@@ -245,51 +221,28 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // ============ HUNT SELECT ============
+  // Hunt Select
   huntSelect.addEventListener('change', () => {
     const huntId = huntSelect.value;
-    const hunt = HUNTS.find(h => h.id === huntId);
-    
-    // ⭐ Envia a mudança para o bot
+    const hunt = HUNTS_LIST.find(h => h.id === huntId);
     chrome.runtime.sendMessage({
       action: 'updateConfig',
-      config: { 
-        selectedHunt: huntId,
-        selectedHuntName: hunt ? hunt.title : huntId
-      }
+      config: { selectedHunt: huntId }
     }, () => {
       addLog(`🏹 Caçada alterada para: ${hunt ? hunt.title : huntId}`);
-      // Atualiza o valor exibido
-      const hunt = HUNTS.find(h => h.id === huntId);
       huntValue.textContent = hunt ? hunt.title : 'Nenhuma';
     });
   });
 
-  // ============ PULL SELECT ============
+  // Pull Select
   pullSelect.addEventListener('change', () => {
     const pull = pullSelect.value;
-    
-    // ⭐ Envia a mudança para o bot
     chrome.runtime.sendMessage({
       action: 'updateConfig',
       config: { selectedPull: pull }
     }, () => {
       addLog(`🎯 Pull alterado para: ${pull}`);
       pullValue.textContent = pull;
-    });
-  });
-
-  // ============ PARTY MODE ============
-  partyModeSelect.addEventListener('change', () => {
-    const mode = partyModeSelect.value;
-    
-    // ⭐ Envia a mudança para o bot
-    chrome.runtime.sendMessage({
-      action: 'updateConfig',
-      config: { partyMode: mode }
-    }, () => {
-      addLog(`👥 Modo Party alterado para: ${mode === 'leader' ? 'Líder' : mode === 'member' ? 'Membro' : 'Solo'}`);
-      modeValue.textContent = mode === 'leader' ? 'Líder' : mode === 'member' ? 'Membro' : 'Solo';
     });
   });
 
@@ -316,6 +269,29 @@ document.addEventListener('DOMContentLoaded', () => {
   forceSellBtn.addEventListener('click', () => {
     chrome.runtime.sendMessage({ action: 'forceSell' }, () => {
       addLog('💰 Forçando venda...');
+    });
+  });
+
+  // Reload Scripts do GitHub
+  reloadBtn.addEventListener('click', () => {
+    reloadBtn.textContent = '⏳';
+    reloadBtn.disabled = true;
+    addLog('🔄 Recarregando scripts do GitHub...');
+    
+    chrome.runtime.sendMessage({ action: 'reloadScripts' }, (response) => {
+      reloadBtn.textContent = '🔄';
+      reloadBtn.disabled = false;
+      
+      if (response && response.success) {
+        addLog('✅ Scripts recarregados do GitHub!');
+        // Recarregar itens
+        setTimeout(() => {
+          loadItems();
+          addLog(`📦 ${ALL_ITEMS.length} itens disponíveis`);
+        }, 1000);
+      } else {
+        addLog('❌ Falha ao recarregar scripts!', 'error');
+      }
     });
   });
 
@@ -473,13 +449,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ============ INICIALIZAÇÃO ============
 
-  // Carrega itens
   loadItems();
-
-  // Popula hunts
   populateHunts();
 
-  // Carrega configurações
   chrome.runtime.sendMessage({ action: 'getStatus' }, (response) => {
     if (response) {
       huntSelect.value = response.selectedHunt || 'rat-hunt';
@@ -510,19 +482,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Atualiza status
   updateStatus();
   setInterval(updateStatus, 3000);
 
   addLog('✅ Dashboard carregado!');
   addLog(`📦 ${ALL_ITEMS.length} itens disponíveis`);
-  addLog(`🏹 ${HUNTS.length} caçadas disponíveis`);
+  addLog(`🏹 ${HUNTS_LIST.length} caçadas disponíveis`);
+  addLog('📦 GitHub: wandersonlt/huntera-bot');
 
-  // Debug
   window.__hunteraDebug = {
     items: ALL_ITEMS,
     blocked: BLOCKED_ITEMS,
-    hunts: HUNTS,
+    hunts: HUNTS_LIST,
     searchItems: searchItems
   };
 });

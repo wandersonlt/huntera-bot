@@ -4,38 +4,21 @@
   <meta charset="UTF-8">
   <title>Huntera Bot - Configuração</title>
   <link rel="stylesheet" href="dashboard.css">
-  <style>
-    /* Estilo específico para popup */
-    body {
-      width: 500px !important;
-      max-width: 500px !important;
-      min-height: 650px !important;
-      overflow-y: auto !important;
-      margin: 0 auto !important;
-    }
-    /* Remove barras de rolagem desnecessárias */
-    ::-webkit-scrollbar {
-      width: 4px;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #30363d;
-      border-radius: 2px;
-    }
-  </style>
 </head>
 <body>
 <div class="container">
-  <!-- Header -->
   <div class="header">
     <span class="title">🎯 Huntera Bot</span>
-    <span class="status">
-      <span class="status-dot offline" id="statusDot"></span>
-      <span id="statusText">Offline</span>
-    </span>
-    <button class="btn-close" id="closeBtn">✕</button>
+    <div class="header-actions">
+      <button class="btn btn-small" id="reloadBtn" title="Recarregar scripts do GitHub">🔄</button>
+      <span class="status">
+        <span class="status-dot offline" id="statusDot"></span>
+        <span id="statusText">Offline</span>
+      </span>
+      <button class="btn-close" id="closeBtn">✕</button>
+    </div>
   </div>
 
-  <!-- Status Bar -->
   <div class="status-bar">
     <div class="status-item">
       <span class="status-label">Status</span>
@@ -55,7 +38,6 @@
     </div>
   </div>
 
-  <!-- Tabs -->
   <div class="tabs">
     <button class="tab active" data-tab="hunt">🏹 Hunt</button>
     <button class="tab" data-tab="sell">💰 Venda</button>
@@ -63,13 +45,12 @@
     <button class="tab" data-tab="items">📦 Itens</button>
   </div>
 
-  <!-- Tab: Hunt -->
+  <!-- Tab Hunt -->
   <div class="tab-content active" id="tab-hunt">
     <div class="form-group">
       <label>Caçada</label>
       <select id="huntSelect"></select>
     </div>
-    
     <div class="form-group">
       <label>Pull</label>
       <select id="pullSelect">
@@ -78,7 +59,6 @@
         <option value="Agressivo">Agressivo</option>
       </select>
     </div>
-
     <div class="form-group">
       <label>Modo Party</label>
       <select id="partyModeSelect">
@@ -87,79 +67,69 @@
         <option value="member">Membro</option>
       </select>
     </div>
-    
     <div class="checkbox-group">
       <input type="checkbox" id="autoStart" checked>
       <label for="autoStart">Auto Start</label>
     </div>
-    
     <div class="checkbox-group">
       <input type="checkbox" id="retryOnFail" checked>
       <label for="retryOnFail">Retry on Fail</label>
     </div>
-    
     <div class="flex gap-4">
       <button class="btn btn-primary flex-1" id="startHuntBtn">▶️ Iniciar Caçada</button>
       <button class="btn" id="toggleHuntBtn">🟢 Ativo</button>
     </div>
   </div>
 
-  <!-- Tab: Sell -->
+  <!-- Tab Venda -->
   <div class="tab-content" id="tab-sell">
     <div class="checkbox-group">
       <input type="checkbox" id="ignoreEquipped" checked>
       <label for="ignoreEquipped">Ignorar equipados</label>
     </div>
-    
     <div class="checkbox-group">
       <input type="checkbox" id="autoSell" checked>
       <label for="autoSell">Vender na cidade</label>
     </div>
-    
     <div class="form-group">
       <label>Cooldown</label>
       <select id="cooldownSelect">
-        <option value="5000">5 segundos</option>
-        <option value="10000" selected>10 segundos</option>
-        <option value="15000">15 segundos</option>
-        <option value="30000">30 segundos</option>
+        <option value="5000">5s</option>
+        <option value="10000" selected>10s</option>
+        <option value="15000">15s</option>
+        <option value="30000">30s</option>
       </select>
     </div>
-    
     <div class="flex gap-4">
       <button class="btn btn-primary flex-1" id="forceSellBtn">💰 Forçar Venda</button>
       <button class="btn" id="toggleSellBtn">🟢 Ativo</button>
     </div>
   </div>
 
-  <!-- Tab: Party -->
+  <!-- Tab Party -->
   <div class="tab-content" id="tab-party">
     <div class="checkbox-group">
       <input type="checkbox" id="acceptInvite" checked>
       <label for="acceptInvite">Aceitar convite de party</label>
     </div>
-    
     <div class="checkbox-group">
       <input type="checkbox" id="acceptHunt" checked>
       <label for="acceptHunt">Aceitar convite de caçada</label>
     </div>
-    
     <div class="checkbox-group">
       <input type="checkbox" id="acceptCostShare" checked>
       <label for="acceptCostShare">Aceitar rateio</label>
     </div>
-    
     <div class="checkbox-group">
       <input type="checkbox" id="followLeader" checked>
       <label for="followLeader">Seguir líder</label>
     </div>
-    
     <div class="flex gap-4">
       <button class="btn flex-1" id="togglePartyBtn">🟢 Ativo</button>
     </div>
   </div>
 
-  <!-- Tab: Items -->
+  <!-- Tab Itens -->
   <div class="tab-content" id="tab-items">
     <div class="form-group">
       <label>Buscar Item</label>
@@ -168,32 +138,27 @@
         <button class="btn" id="addItemBtn">➕</button>
       </div>
     </div>
-    
     <div class="form-group">
       <label>Categoria</label>
       <select id="categoryFilter">
         <option value="">Todas</option>
       </select>
     </div>
-    
     <div class="items-list" id="blockedItemsList"></div>
-    
     <div class="flex gap-4 mt-8">
       <button class="btn" id="clearItemsBtn">🗑️ Limpar</button>
       <button class="btn" id="exportItemsBtn">📤 Exportar</button>
       <button class="btn" id="importItemsBtn">📥 Importar</button>
     </div>
-    
     <div class="mt-8" id="itemCount">Total: 0 itens bloqueados</div>
     <div class="mt-4" id="itemSearchResults"></div>
   </div>
 
-  <!-- Log -->
   <div class="log" id="logContainer">
     <div class="info">🟢 Bot inicializado</div>
   </div>
+  <div class="footer-info">📦 GitHub: wandersonlt/huntera-bot</div>
 </div>
-
 <script src="dashboard.js"></script>
 </body>
 </html>

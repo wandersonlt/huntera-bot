@@ -1,4 +1,4 @@
-// modules/hunt.js - CORRIGIDO
+// modules/hunt.js
 class HuntModule extends HunteraModule {
   constructor() {
     super('Hunt');
@@ -12,7 +12,6 @@ class HuntModule extends HunteraModule {
       partyMode: localStorage.getItem('huntera_partyMode') || 'solo'
     };
 
-    // TODAS AS 52 HUNTS
     this.allHunts = [
       { id: 'rat-hunt', title: 'Rat Cellars', monster: 'Rat' },
       { id: 'spider-hunt', title: 'Spider Nest', monster: 'Spider' },
@@ -72,7 +71,6 @@ class HuntModule extends HunteraModule {
     this._lastHuntTime = 0;
     this._cooldown = 5000;
     this._isNavigating = false;
-    this._lastConfig = {};
 
     this.selectors = {
       huntTab: '[data-tab="hunt"]',
@@ -86,68 +84,11 @@ class HuntModule extends HunteraModule {
       teamBtn: '#hunt-start-team',
       leaveBtn: '#nav-leave-hunt',
       awayNote: '.hunt-away-note',
-      selected: '.hunt-entry.selected',
-      startButton: 'button:contains("Iniciar")'
+      selected: '.hunt-entry.selected'
     };
 
     this._loadConfig();
-    this._lastConfig = { ...this.config };
     this.log(`📋 ${this.allHunts.length} caçadas carregadas`, 'info');
-  }
-
-  // ⭐ NOVO: Verifica se a configuração mudou e aplica
-  updateConfig(config) {
-    const changed = {};
-    for (const key in config) {
-      if (this.config[key] !== config[key]) {
-        changed[key] = config[key];
-      }
-    }
-    
-    Object.assign(this.config, config);
-    this._saveConfig();
-    
-    // Aplica mudanças imediatamente
-    if (Object.keys(changed).length > 0) {
-      this.log(`⚙️ Configuração alterada: ${JSON.stringify(changed)}`);
-      this._applyConfigChanges(changed);
-    }
-    
-    return true;
-  }
-
-  // ⭐ NOVO: Aplica mudanças de configuração
-  async _applyConfigChanges(changed) {
-    // Se mudou a hunt ou pull, aplica imediatamente
-    if (changed.selectedHunt || changed.selectedPull) {
-      this.log('🔄 Aplicando nova configuração...');
-      
-      // Se está em uma hunt, não faz nada (espera voltar pra cidade)
-      if (this.isInHunt()) {
-        this.log('⏳ Em hunt, aguardando retorno para aplicar configuração');
-        return;
-      }
-      
-      // Se está na cidade, aplica
-      if (this.isInCity()) {
-        this.log('🏙️ Na cidade, aplicando nova configuração');
-        await this.openHuntWindow();
-        await this.delay(500);
-        
-        if (changed.selectedHunt) {
-          await this.selectHunt(changed.selectedHunt);
-        }
-        if (changed.selectedPull) {
-          await this.applyPull(changed.selectedPull);
-        }
-        
-        // Se autoStart estiver ativo, inicia a hunt
-        if (this.config.autoStart) {
-          this.log('🚀 AutoStart ativo, iniciando caçada...');
-          await this.startHunt();
-        }
-      }
-    }
   }
 
   async openHuntWindow() {
@@ -160,7 +101,6 @@ class HuntModule extends HunteraModule {
     this.log('Abrindo janela de caçadas...');
 
     try {
-      // Verifica se a janela já está aberta
       const windowEl = this.findElement(this.selectors.huntWindow);
       if (windowEl && windowEl.offsetParent !== null) {
         this.log('Janela já está aberta');
@@ -168,24 +108,17 @@ class HuntModule extends HunteraModule {
         return true;
       }
 
-      // Tenta clicar na aba Hunt
       let huntTab = this.findElement(this.selectors.huntTab);
-      if (huntTab) {
-        this.log('Clicando na aba Hunt');
-        if (this.safeClick(huntTab)) {
-          await this.delay(800);
-          this._isNavigating = false;
-          return true;
-        }
+      if (huntTab && this.safeClick(huntTab)) {
+        await this.delay(800);
+        this._isNavigating = false;
+        return true;
       }
 
-      // Tenta encontrar por texto
-      this.log('Procurando aba por texto...');
       const allButtons = document.querySelectorAll('button, a, [role="tab"]');
       for (const btn of allButtons) {
         const text = btn.textContent?.trim() || '';
         if (text.includes('Caçada') || text.includes('Hunt') || text.includes('Caçadas')) {
-          this.log(`Clicando em: ${text}`);
           if (this.safeClick(btn)) {
             await this.delay(800);
             this._isNavigating = false;
@@ -265,7 +198,6 @@ class HuntModule extends HunteraModule {
 
     await this.delay(300);
 
-    // Tenta encontrar pelo data-hunt-id
     const entries = this.findElements(this.selectors.huntEntry);
     for (const entry of entries) {
       const id = entry.getAttribute('data-hunt-id');
@@ -286,10 +218,8 @@ class HuntModule extends HunteraModule {
       }
     }
 
-    // Tenta encontrar pelo título
     const hunt = this.allHunts.find(h => h.id === huntId);
     if (hunt) {
-      this.log(`Procurando por título: ${hunt.title}`);
       for (const entry of entries) {
         const titleEl = entry.querySelector(this.selectors.huntTitle);
         if (titleEl && titleEl.textContent.trim() === hunt.title) {
@@ -320,11 +250,6 @@ class HuntModule extends HunteraModule {
     }
 
     const buttons = container.querySelectorAll(this.selectors.pullOptions);
-    if (!buttons || !buttons.length) {
-      this.log('Botões de pull não encontrados', 'warn');
-      return false;
-    }
-
     for (const btn of buttons) {
       const text = btn.textContent.trim();
       if (text.toLowerCase() === pullName.toLowerCase()) {
@@ -348,7 +273,6 @@ class HuntModule extends HunteraModule {
     return false;
   }
 
-  // ⭐ CORRIGIDO: Iniciar hunt com mais tentativas
   async startHunt() {
     this.log('🚀 Iniciando caçada...');
     
@@ -373,39 +297,13 @@ class HuntModule extends HunteraModule {
     await this.applyPull(this.config.selectedPull);
     await this.delay(300);
 
-    // ⭐ Múltiplas tentativas de encontrar o botão de iniciar
-    let startBtn = null;
-    let teamBtn = null;
-    
-    // Tenta encontrar pelos seletores específicos
-    startBtn = this.findElement(this.selectors.startBtn);
-    teamBtn = this.findElement(this.selectors.teamBtn);
-    
-    // Se não encontrou, tenta por texto
-    if (!startBtn && !teamBtn) {
-      this.log('Procurando botões por texto...');
-      const allBtns = document.querySelectorAll('button');
-      for (const btn of allBtns) {
-        const text = btn.textContent?.trim() || '';
-        if (text.includes('Iniciar caçada') && btn.offsetParent !== null) {
-          startBtn = btn;
-          break;
-        }
-        if (text.includes('Iniciar com o time') && btn.offsetParent !== null) {
-          teamBtn = btn;
-          break;
-        }
-        if (text.includes('Iniciar') && btn.offsetParent !== null && btn.dataset?.tab !== 'hunt') {
-          if (!startBtn) startBtn = btn;
-        }
-      }
-    }
+    let startBtn = this.findElement(this.selectors.startBtn);
+    let teamBtn = this.findElement(this.selectors.teamBtn);
 
-    // Tenta iniciar solo
     if (startBtn && !startBtn.disabled && startBtn.offsetParent !== null) {
       this.log('Clicando em "Iniciar caçada"');
       if (this.safeClick(startBtn)) {
-        await this.delay(2000);
+        await this.delay(1500);
         this._retryCount = 0;
         this.emit('huntStarted', this.config.selectedHunt);
         this.log('✅ Caçada iniciada!');
@@ -413,11 +311,10 @@ class HuntModule extends HunteraModule {
       }
     }
 
-    // Tenta iniciar com time
     if (teamBtn && !teamBtn.disabled && teamBtn.offsetParent !== null) {
       this.log('Clicando em "Iniciar com o time"');
       if (this.safeClick(teamBtn)) {
-        await this.delay(2000);
+        await this.delay(1500);
         this._retryCount = 0;
         this.emit('huntStartedTeam', this.config.selectedHunt);
         this.log('✅ Caçada iniciada com o time!');
@@ -425,14 +322,12 @@ class HuntModule extends HunteraModule {
       }
     }
 
-    // ⭐ Última tentativa: clicar em qualquer botão que contenha "Iniciar"
-    this.log('Tentando qualquer botão de iniciar...');
     const allBtns = document.querySelectorAll('button');
     for (const btn of allBtns) {
       const text = btn.textContent?.trim() || '';
       if (text.includes('Iniciar') && !btn.disabled && btn.offsetParent !== null) {
         if (this.safeClick(btn)) {
-          await this.delay(2000);
+          await this.delay(1500);
           this._retryCount = 0;
           this.log(`✅ Caçada iniciada via: ${text}`);
           return true;
@@ -487,22 +382,10 @@ class HuntModule extends HunteraModule {
     if (!this.isRunning()) return;
 
     try {
-      // Verifica se está na cidade e autoStart ativado
-      if (this.isInCity() && this.config.autoStart) {
-        if (this.config.selectedHunt) {
-          this.log('🏙️ Na cidade, retornando para caçada...');
-          await this.startHunt();
-        }
+      if (this.isInCity() && this.config.autoStart && this.config.selectedHunt) {
+        this.log('🏙️ Na cidade, retornando para caçada...');
+        await this.startHunt();
       }
-
-      // Verifica se a config mudou enquanto está em hunt
-      if (this.isInHunt()) {
-        // Se mudou a hunt ou pull, aplica quando voltar
-        const currentHunt = this.config.selectedHunt;
-        const currentPull = this.config.selectedPull;
-        // Apenas loga que está em hunt com as configs atuais
-      }
-
     } catch (e) {
       this.log(`Erro no loop: ${e.message}`, 'error');
     }

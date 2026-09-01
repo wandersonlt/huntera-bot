@@ -13,7 +13,6 @@ body {
 
 .container { max-width: 100%; }
 
-/* Header */
 .header {
   display: flex;
   align-items: center;
@@ -23,6 +22,11 @@ body {
   margin-bottom: 12px;
 }
 .title { font-size: 18px; font-weight: bold; }
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
 .status {
   display: flex;
   align-items: center;
@@ -46,8 +50,18 @@ body {
   padding: 4px 8px;
 }
 .btn-close:hover { color: #f0f6fc; }
+.btn-small {
+  padding: 4px 8px;
+  font-size: 14px;
+  background: #21262d;
+  border: 1px solid #30363d;
+  border-radius: 4px;
+  color: #f0f6fc;
+  cursor: pointer;
+}
+.btn-small:hover { background: #30363d; }
+.btn-small:disabled { opacity: 0.5; cursor: not-allowed; }
 
-/* Status Bar */
 .status-bar {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 1fr;
@@ -73,7 +87,6 @@ body {
   margin-top: 2px;
 }
 
-/* Tabs */
 .tabs {
   display: flex;
   gap: 2px;
@@ -96,11 +109,9 @@ body {
   border-bottom-color: #3fb950;
 }
 
-/* Tab Content */
 .tab-content { display: none; padding: 8px 0; }
 .tab-content.active { display: block; }
 
-/* Form */
 .form-group { margin-bottom: 12px; }
 .form-group label {
   display: block;
@@ -124,7 +135,6 @@ body {
   border-color: #3fb950;
 }
 
-/* Checkbox */
 .checkbox-group {
   display: flex;
   align-items: center;
@@ -142,7 +152,6 @@ body {
   cursor: pointer;
 }
 
-/* Buttons */
 .btn {
   padding: 8px 16px;
   border: 1px solid #30363d;
@@ -165,14 +174,12 @@ body {
 }
 .btn-danger:hover { background: #f85149; }
 
-/* Flex */
 .flex { display: flex; }
 .flex-1 { flex: 1; }
 .gap-4 { gap: 4px; }
 .mt-8 { margin-top: 8px; }
 .mb-8 { margin-bottom: 8px; }
 
-/* Items List */
 .items-list {
   max-height: 200px;
   overflow-y: auto;
@@ -197,7 +204,6 @@ body {
 }
 .items-list .item .remove:hover { color: #ff6b6b; }
 
-/* Log */
 .log {
   margin-top: 12px;
   padding: 10px;
@@ -214,7 +220,15 @@ body {
 .log .warn { color: #d29922; }
 .log .error { color: #f85149; }
 
-/* Scrollbar */
+.footer-info {
+  margin-top: 8px;
+  font-size: 9px;
+  color: #8b949e;
+  text-align: center;
+  border-top: 1px solid #30363d;
+  padding-top: 8px;
+}
+
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -228,11 +242,4 @@ body {
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #484f58;
-}
-
-/* Popup mode */
-body.popup-mode {
-  width: 100%;
-  max-width: 480px;
-  margin: 0 auto;
 }
