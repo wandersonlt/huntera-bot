@@ -305,87 +305,91 @@ class HuntModule extends HunteraModule {
     await this.delay(500);
 
     // ============================================================
-    // CORREÇÃO: GARANTIR QUE A JANELA E O BOTÃO ESTEJAM VISÍVEIS
+    // CORREÇÃO: IGUAL AO TESTE MANUAL QUE FUNCIONOU
     // ============================================================
-    this.log('🔍 Verificando visibilidade da janela...');
+    this.log('🔍 Forçando visibilidade do botão (igual ao teste manual)...');
     
-    // 1. Verificar se a janela de caçadas está visível
+    // 1. Encontrar a janela
     const huntWindow = document.querySelector('.hunt-window');
     if (huntWindow) {
-      this.log('📐 Janela de caçadas encontrada');
-      // Forçar visibilidade
-      if (huntWindow.offsetParent === null) {
-        this.log('⚠️ Janela não está visível, forçando...');
-        huntWindow.style.display = 'block';
-        huntWindow.style.visibility = 'visible';
-        huntWindow.style.opacity = '1';
-        // Remover hidden
-        huntWindow.removeAttribute('hidden');
-      }
+      this.log('✅ Janela encontrada, forçando visibilidade...');
+      huntWindow.style.display = 'block';
+      huntWindow.style.visibility = 'visible';
+      huntWindow.style.opacity = '1';
+      huntWindow.removeAttribute('hidden');
+      huntWindow.removeAttribute('aria-hidden');
     }
     
-    // 2. Verificar o footer da janela
-    const footer = document.querySelector('.hunt-window footer, .hunt-browser footer');
-    if (footer) {
-      this.log('📐 Footer encontrado');
-      if (footer.offsetParent === null) {
-        this.log('⚠️ Footer não está visível, forçando...');
-        footer.style.display = 'flex';
-        footer.style.visibility = 'visible';
-      }
+    // 2. Encontrar o footer
+    const huntFooter = document.querySelector('.hunt-window footer');
+    if (huntFooter) {
+      this.log('✅ Footer encontrado, forçando visibilidade...');
+      huntFooter.style.display = 'flex';
+      huntFooter.style.visibility = 'visible';
+      huntFooter.style.opacity = '1';
     }
     
-    // 3. Verificar se o botão existe
-    let startBtn = document.querySelector('#hunt-start');
+    // 3. Encontrar o botão
+    const startBtn = document.querySelector('#hunt-start');
     if (!startBtn) {
-      this.log('❌ Botão #hunt-start não encontrado no DOM!', 'error');
+      this.log('❌ Botão #hunt-start não encontrado!', 'error');
       return false;
     }
     
-    this.log(`✅ Botão #hunt-start encontrado: "${startBtn.textContent}"`);
+    this.log('✅ Botão encontrado, forçando visibilidade...');
+    startBtn.style.display = 'inline-block';
+    startBtn.style.visibility = 'visible';
+    startBtn.style.opacity = '1';
+    startBtn.removeAttribute('hidden');
+    startBtn.removeAttribute('aria-hidden');
+    startBtn.disabled = false;
     
-    // 4. Forçar visibilidade do botão
-    if (startBtn.offsetParent === null) {
-      this.log('⚠️ Botão não está visível, forçando...');
+    // 4. Forçar visibilidade dos pais
+    let parent = startBtn.parentElement;
+    while (parent && parent !== document.body) {
+      if (parent.offsetParent === null || parent.hidden) {
+        parent.style.display = 'block';
+        parent.style.visibility = 'visible';
+        parent.style.opacity = '1';
+        parent.removeAttribute('hidden');
+        parent.removeAttribute('aria-hidden');
+      }
+      parent = parent.parentElement;
+    }
+    
+    // 5. Aguardar e verificar visibilidade
+    await this.delay(300);
+    
+    // 6. Verificar se ficou visível
+    const rect = startBtn.getBoundingClientRect();
+    const isVisible = rect.width > 0 && rect.height > 0;
+    this.log(`📊 Botão visível: ${isVisible}, tamanho: ${rect.width}x${rect.height}`);
+    
+    if (!isVisible) {
+      this.log('⚠️ Botão ainda não está visível, tentando novamente...');
+      // Tenta novamente com mais força
       startBtn.style.display = 'inline-block';
       startBtn.style.visibility = 'visible';
       startBtn.style.opacity = '1';
-      startBtn.removeAttribute('hidden');
-      // Forçar o container pai também
-      let parent = startBtn.parentElement;
-      while (parent && parent !== document.body) {
-        if (parent.offsetParent === null) {
-          parent.style.display = 'block';
-          parent.style.visibility = 'visible';
-        }
-        parent = parent.parentElement;
-      }
+      await this.delay(500);
+      const rect2 = startBtn.getBoundingClientRect();
+      this.log(`📊 Segunda tentativa: ${rect2.width}x${rect2.height}`);
     }
     
-    // 5. Verificar se o botão está habilitado
-    if (startBtn.disabled) {
-      this.log('⚠️ Botão está desabilitado, tentando habilitar...');
-      startBtn.disabled = false;
-      startBtn.removeAttribute('disabled');
-    }
-    
-    // 6. Scroll para o botão
+    // 7. Scroll para o botão
     this.log('📜 Scroll para o botão...');
     startBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
     await this.delay(500);
     
-    // 7. Verificar novamente a visibilidade após scroll
-    const rect = startBtn.getBoundingClientRect();
-    const isVisible = rect.width > 0 && rect.height > 0 && startBtn.offsetParent !== null;
-    this.log(`📊 Botão visível: ${isVisible}, posição: ${rect.top}, ${rect.left}`);
+    // 8. Verificar novamente
+    const finalRect = startBtn.getBoundingClientRect();
+    const isFinalVisible = finalRect.width > 0 && finalRect.height > 0;
+    this.log(`📊 Status final: visível=${isFinalVisible}, posição: ${finalRect.top}, ${finalRect.left}`);
     
-    // ============================================================
-    // TENTAR CLICAR
-    // ============================================================
-    if (isVisible && !startBtn.disabled) {
-      this.log('✅ Botão está visível e habilitado, clicando...');
+    // 9. CLICAR!
+    if (isFinalVisible && !startBtn.disabled) {
+      this.log('✅ Botão visível e habilitado, clicando...');
       
-      // Tenta diferentes formas de clique
       try {
         startBtn.click();
         this.log('✅ Clique nativo executado!');
@@ -398,6 +402,7 @@ class HuntModule extends HunteraModule {
         this.log(`⚠️ Clique nativo falhou: ${e.message}`);
       }
       
+      // Tentar dispatchEvent
       try {
         const clickEvent = new MouseEvent('click', {
           view: window,
@@ -415,6 +420,7 @@ class HuntModule extends HunteraModule {
         this.log(`⚠️ Evento dispatch falhou: ${e.message}`);
       }
       
+      // Tentar safeClick
       if (this.safeClick(startBtn)) {
         this.log('✅ safeClick executado!');
         await this.delay(2000);
@@ -424,21 +430,49 @@ class HuntModule extends HunteraModule {
         return true;
       }
     } else {
-      this.log(`⚠️ Botão não está clicável: visível=${isVisible}, disabled=${startBtn.disabled}`, 'warn');
+      this.log(`⚠️ Botão não está clicável: visível=${isFinalVisible}, disabled=${startBtn.disabled}`, 'warn');
     }
 
     // ============================================================
-    // FALLBACK: Tentar o botão "Iniciar com o time"
+    // FALLBACK: Tentar o botão "Encontrar time" (que estava visível)
+    // ============================================================
+    this.log('🔍 Tentando botão #hunt-find-team (estava visível no teste)...');
+    let findTeamBtn = document.querySelector('#hunt-find-team');
+    if (findTeamBtn) {
+      findTeamBtn.style.display = 'inline-block';
+      findTeamBtn.style.visibility = 'visible';
+      findTeamBtn.removeAttribute('hidden');
+      findTeamBtn.disabled = false;
+      
+      if (findTeamBtn.offsetParent !== null) {
+        this.log('✅ Clicando em "Encontrar time"');
+        findTeamBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        await this.delay(300);
+        try {
+          findTeamBtn.click();
+          await this.delay(2000);
+          this._retryCount = 0;
+          this.emit('huntStarted', this.config.selectedHunt);
+          this.log('✅ Caçada iniciada via "Encontrar time"!');
+          return true;
+        } catch (e) {
+          this.log(`⚠️ Falha ao clicar no botão team: ${e.message}`);
+        }
+      }
+    }
+
+    // ============================================================
+    // FALLBACK 2: Tentar o botão "Iniciar com o time"
     // ============================================================
     this.log('🔍 Tentando botão #hunt-start-team...');
     let teamBtn = document.querySelector('#hunt-start-team');
     if (teamBtn) {
-      // Forçar visibilidade
-      if (teamBtn.offsetParent === null) {
-        teamBtn.style.display = 'inline-block';
-        teamBtn.style.visibility = 'visible';
-      }
-      if (!teamBtn.disabled && teamBtn.offsetParent !== null) {
+      teamBtn.style.display = 'inline-block';
+      teamBtn.style.visibility = 'visible';
+      teamBtn.removeAttribute('hidden');
+      teamBtn.disabled = false;
+      
+      if (teamBtn.offsetParent !== null) {
         this.log('✅ Clicando em "Iniciar com o time"');
         teamBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
         await this.delay(300);
@@ -453,48 +487,6 @@ class HuntModule extends HunteraModule {
           this.log(`⚠️ Falha ao clicar no botão team: ${e.message}`);
         }
       }
-    }
-
-    // ============================================================
-    // FALLBACK 2: Tentar o botão "Completar o time"
-    // ============================================================
-    this.log('🔍 Tentando botão #hunt-find-team...');
-    let findTeamBtn = document.querySelector('#hunt-find-team');
-    if (findTeamBtn) {
-      if (findTeamBtn.offsetParent === null) {
-        findTeamBtn.style.display = 'inline-block';
-        findTeamBtn.style.visibility = 'visible';
-      }
-      if (!findTeamBtn.disabled && findTeamBtn.offsetParent !== null) {
-        this.log('✅ Clicando em "Completar o time"');
-        findTeamBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        await this.delay(300);
-        try {
-          findTeamBtn.click();
-          await this.delay(2000);
-          this._retryCount = 0;
-          this.emit('huntStarted', this.config.selectedHunt);
-          this.log('✅ Caçada iniciada com o time!');
-          return true;
-        } catch (e) {
-          this.log(`⚠️ Falha ao clicar no botão team: ${e.message}`);
-        }
-      }
-    }
-
-    // ============================================================
-    // DEBUG: LISTAR TODOS OS BOTÕES DO FOOTER
-    // ============================================================
-    this.log('🔍 DEBUG: Botões do footer:');
-    const footerBtns = document.querySelectorAll('.hunt-window footer button, .hunt-browser footer button');
-    let count = 0;
-    for (const btn of footerBtns) {
-      count++;
-      const text = btn.textContent?.trim() || '';
-      const id = btn.id || '';
-      const visible = btn.offsetParent !== null;
-      const disabled = btn.disabled;
-      this.log(`  ${count}. "${text}" (id: ${id}, visível: ${visible}, disabled: ${disabled})`);
     }
 
     this.log('❌ Não foi possível iniciar a caçada', 'warn');
