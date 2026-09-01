@@ -632,7 +632,7 @@ const COMMON_BLOCKED_ITEMS = [
 ];
 
 // ============================================================
-// FUNÇÕES AUXILIARES
+// FUNÇÕES AUXILIARES (APENAS UMA VEZ)
 // ============================================================
 function getItemsByCategory(category) {
   return HUNTERA_ITEMS[category] || [];

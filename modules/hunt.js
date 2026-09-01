@@ -334,6 +334,8 @@ class HuntModule extends HunteraModule {
   // ============================================================
   // INICIAR HUNT
   // ============================================================
+ // modules/hunt.js - startHunt() CORRIGIDO (substitua esta função)
+
   async startHunt() {
     this.log('🚀 Iniciando caçada...');
     
@@ -359,16 +361,32 @@ class HuntModule extends HunteraModule {
     await this.delay(500);
 
     // ============================================================
-    // PROCURAR BOTÃO DE INICIAR
+    // CORREÇÃO: PROCURAR BOTÃO DE INICIAR DE VÁRIAS FORMAS
     // ============================================================
     this.log('🔍 Procurando botão de iniciar...');
     
     let startBtn = null;
     let attempts = 0;
-    const maxAttempts = 15;
+    const maxAttempts = 20;
     
     while (attempts < maxAttempts) {
-      startBtn = this.findElement(this.selectors.startBtn);
+      // Tenta encontrar de várias formas
+      startBtn = this.findElement('#hunt-start');
+      if (!startBtn) {
+        startBtn = this.findElement('[data-action="start"]');
+      }
+      if (!startBtn) {
+        // Procura por qualquer botão com "Iniciar" dentro da janela
+        const allBtns = document.querySelectorAll('.hunt-window button, .hunt-browser button');
+        for (const btn of allBtns) {
+          const text = btn.textContent?.trim() || '';
+          if (text.includes('Iniciar caçada') || text === 'Iniciar') {
+            startBtn = btn;
+            break;
+          }
+        }
+      }
+      
       if (startBtn) {
         const isVisible = startBtn.offsetParent !== null;
         const isEnabled = !startBtn.disabled;
@@ -386,24 +404,101 @@ class HuntModule extends HunteraModule {
       await this.delay(500);
     }
 
-    // Tenta clicar no botão "Iniciar caçada"
+    // Se encontrou o botão, tenta clicar
     if (startBtn && !startBtn.disabled && startBtn.offsetParent !== null) {
       this.log('✅ Clicando em "Iniciar caçada"');
+      
       startBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
       await this.delay(300);
       
       try {
         startBtn.click();
-        this.log('✅ Clique executado!');
+        this.log('✅ Clique nativo executado!');
         await this.delay(2000);
         this._retryCount = 0;
         this.emit('huntStarted', this.config.selectedHunt);
         this.log('✅ Caçada iniciada!');
         return true;
       } catch (e) {
-        this.log(`⚠️ Clique falhou: ${e.message}`);
+        this.log(`⚠️ Clique nativo falhou: ${e.message}`);
+      }
+      
+      try {
+        const clickEvent = new MouseEvent('click', {
+          view: window,
+          bubbles: true,
+          cancelable: true
+        });
+        startBtn.dispatchEvent(clickEvent);
+        this.log('✅ Evento dispatchado!');
+        await this.delay(2000);
+        this._retryCount = 0;
+        this.emit('huntStarted', this.config.selectedHunt);
+        this.log('✅ Caçada iniciada!');
+        return true;
+      } catch (e) {
+        this.log(`⚠️ Evento dispatch falhou: ${e.message}`);
       }
     }
+
+    // ============================================================
+    // FALLBACK: Tentar o botão "Iniciar com o time"
+    // ============================================================
+    let teamBtn = this.findElement(this.selectors.teamBtn);
+    if (teamBtn && !teamBtn.disabled && teamBtn.offsetParent !== null) {
+      this.log('✅ Clicando em "Iniciar com o time"');
+      teamBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      await this.delay(300);
+      try {
+        teamBtn.click();
+        await this.delay(2000);
+        this._retryCount = 0;
+        this.emit('huntStartedTeam', this.config.selectedHunt);
+        this.log('✅ Caçada iniciada com o time!');
+        return true;
+      } catch (e) {
+        this.log(`⚠️ Falha ao clicar no botão team: ${e.message}`);
+      }
+    }
+
+    // ============================================================
+    // FALLBACK 2: Tentar qualquer botão com "Iniciar"
+    // ============================================================
+    this.log('🔍 Procurando qualquer botão com "Iniciar"...');
+    const allButtons = document.querySelectorAll('button');
+    for (const btn of allButtons) {
+      const text = btn.textContent?.trim() || '';
+      if (text.includes('Iniciar') && !btn.disabled && btn.offsetParent !== null) {
+        const parent = btn.closest('.hunt-window, .hunt-browser, [class*="hunt"]');
+        if (parent || text.includes('caçada')) {
+          this.log(`✅ Botão encontrado: "${text}"`);
+          btn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          await this.delay(300);
+          try {
+            btn.click();
+            await this.delay(2000);
+            this._retryCount = 0;
+            this.emit('huntStarted', this.config.selectedHunt);
+            this.log(`✅ Caçada iniciada via: "${text}"`);
+            return true;
+          } catch (e) {
+            this.log(`⚠️ Falha ao clicar em "${text}": ${e.message}`);
+          }
+        }
+      }
+    }
+
+    this.log('❌ Não foi possível iniciar a caçada', 'warn');
+
+    if (this.config.retryOnFail && this._retryCount < this.config.maxRetries) {
+      this._retryCount++;
+      this.log(`🔄 Tentando novamente (${this._retryCount}/${this.config.maxRetries})...`);
+      await this.delay(2000);
+      return this.startHunt();
+    }
+
+    return false;
+  }
 
     // Tenta o botão "Iniciar com o time"
     let teamBtn = this.findElement(this.selectors.teamBtn);

@@ -13,7 +13,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const huntSelect = document.getElementById('huntSelect');
   const pullSelect = document.getElementById('pullSelect');
   const partyModeSelect = document.getElementById('partyModeSelect');
-  const startHuntBtn = document.getElementById('startHuntBtn');
   const forceSellBtn = document.getElementById('forceSellBtn');
   const toggleHuntBtn = document.getElementById('toggleHuntBtn');
   const toggleSellBtn = document.getElementById('toggleSellBtn');
@@ -202,7 +201,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ============================================================
-  // 🔧 CORREÇÃO: BUSCA DE ITENS (Case Insensitive + Busca Parcial)
+  // 🔧 BUSCA DE ITENS (Case Insensitive + Busca Parcial)
   // ============================================================
   function searchItems(query) {
     if (!query || query.length === 0) {
@@ -212,13 +211,13 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const searchTerm = query.trim();
     
-    // Usa a função global se disponível (mais completa)
+    // Usa a função global se disponível
     if (window.searchItems) {
       const results = window.searchItems(searchTerm);
       return results;
     }
     
-    // Fallback: busca local
+    // Fallback
     const q = searchTerm.toLowerCase();
     const results = ALL_ITEMS.filter(item => 
       item.toLowerCase().includes(q)
@@ -228,7 +227,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ============================================================
-  // 🔧 CORREÇÃO: AUTOCOMPLETE COM SUGESTÕES
+  // 🔧 AUTOCOMPLETE COM SUGESTÕES
   // ============================================================
   function showAutocompleteSuggestions(query) {
     if (!query || query.length === 0) {
@@ -239,7 +238,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const searchTerm = query.trim();
     let results = [];
     
-    // Usa autocomplete global se disponível
     if (window.autocompleteItems) {
       results = window.autocompleteItems(searchTerm, 20);
     } else {
@@ -251,7 +249,6 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
     
-    // Mostra os resultados
     const html = results.map(item => 
       `<span style="display:inline-block;padding:4px 10px;margin:3px;background:#21262d;border:1px solid #30363d;border-radius:4px;cursor:pointer;font-size:12px;" data-item="${item}">${item}</span>`
     ).join(' ');
@@ -259,7 +256,6 @@ document.addEventListener('DOMContentLoaded', () => {
     itemSearchResults.innerHTML = html;
     itemSearchResults.innerHTML += `<div style="margin-top:4px;font-size:11px;color:#8b949e;">${results.length} resultados encontrados</div>`;
     
-    // Adiciona evento de clique para cada sugestão
     itemSearchResults.querySelectorAll('[data-item]').forEach(el => {
       el.addEventListener('click', () => {
         const itemName = el.dataset.item;
@@ -271,7 +267,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ============================================================
-  // 🔧 CORREÇÃO: ADICIONAR ITEM BLOQUEADO
+  // 🔧 ADICIONAR ITEM BLOQUEADO
   // ============================================================
   function addBlockedItem(itemName) {
     if (!itemName || itemName.trim() === '') {
@@ -281,14 +277,12 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const item = itemName.trim();
     
-    // Verifica se já está bloqueado (case insensitive)
     const exists = BLOCKED_ITEMS.some(b => b.toLowerCase() === item.toLowerCase());
     if (exists) {
       addLog(`⚠️ Item já está bloqueado: ${item}`, 'warn');
       return;
     }
     
-    // Adiciona
     const newItems = [...BLOCKED_ITEMS, item];
     chrome.runtime.sendMessage({ action: 'setBlockedItems', items: newItems }, () => {
       renderBlockedItems(newItems);
@@ -347,13 +341,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Start Hunt
-  startHuntBtn.addEventListener('click', () => {
-    chrome.runtime.sendMessage({ action: 'startHunt' }, () => {
-      addLog('▶️ Iniciando caçada...');
-    });
-  });
-
   // Force Sell
   forceSellBtn.addEventListener('click', () => {
     chrome.runtime.sendMessage({ action: 'forceSell' }, () => {
@@ -361,7 +348,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Reload Scripts do GitHub
+  // Reload Scripts
   reloadBtn.addEventListener('click', () => {
     reloadBtn.textContent = '⏳';
     reloadBtn.disabled = true;
@@ -412,11 +399,10 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // ============================================================
-  // 🔧 CORREÇÃO: ITEMS - BUSCA COM AUTOCOMPLETE
+  // 🔧 ITEMS - BUSCA COM AUTOCOMPLETE
   // ============================================================
   let searchTimeout = null;
 
-  // Busca com debounce
   itemSearch.addEventListener('input', function() {
     const query = this.value.trim();
     
@@ -434,13 +420,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 300);
   });
 
-  // Add Item - Usando a função corrigida
   addItemBtn.addEventListener('click', () => {
     const item = itemSearch.value.trim();
     addBlockedItem(item);
   });
 
-  // Enter key
   itemSearch.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
       e.preventDefault();

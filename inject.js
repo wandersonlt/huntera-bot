@@ -138,15 +138,20 @@ if (window.__hunteraInjectLoaded) {
     };
   }
 
+
   // ============================================================
   // LOOP PRINCIPAL (com verificação de parada)
   // ============================================================
   async function startLoop() {
-    if (!isRunning) return;
+    if (!isRunning) {
+      console.log('⏹️ Loop interrompido: bot não está rodando');
+      return;
+    }
     
+    // Verifica se deve parar
     const shouldStop = await shouldStopBot();
     if (shouldStop || !botActive) {
-      console.log('⏹️ Bot desativado, parando...');
+      console.log('⏹️ Bot desativado, parando loop...');
       isRunning = false;
       if (window.huntModule) window.huntModule.stop();
       if (window.sellModule) window.sellModule.stop();
@@ -169,7 +174,12 @@ if (window.__hunteraInjectLoaded) {
       console.error('❌ Erro no loop:', e);
     }
     
-    setTimeout(startLoop, 2000);
+    // Continua o loop apenas se ainda estiver rodando
+    if (isRunning && botActive) {
+      setTimeout(startLoop, 2000);
+    } else {
+      console.log('⏹️ Loop finalizado: bot foi desativado');
+    }
   }
 
   // ============================================================
