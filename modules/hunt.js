@@ -273,6 +273,8 @@ class HuntModule extends HunteraModule {
     return false;
   }
 
+    // modules/hunt.js - startHunt() CORRIGIDO (versão definitiva)
+
   async startHunt() {
     this.log('🚀 Iniciando caçada...');
     
@@ -295,15 +297,80 @@ class HuntModule extends HunteraModule {
 
     await this.delay(300);
     await this.applyPull(this.config.selectedPull);
-    await this.delay(300);
+    await this.delay(500);
 
-    let startBtn = this.findElement(this.selectors.startBtn);
-    let teamBtn = this.findElement(this.selectors.teamBtn);
+    // ============================================================
+    // 🔧 CORREÇÃO: Esperar o botão ficar habilitado E visível
+    // ============================================================
+    
+    this.log('🔍 Procurando botão #hunt-start...');
+    
+    let startBtn = null;
+    let attempts = 0;
+    const maxAttempts = 15;
+    
+    while (attempts < maxAttempts) {
+      startBtn = document.querySelector('#hunt-start');
+      if (startBtn) {
+        const isVisible = startBtn.offsetParent !== null;
+        const isEnabled = !startBtn.disabled;
+        const rect = startBtn.getBoundingClientRect();
+        const isOnScreen = rect.width > 0 && rect.height > 0;
+        
+        this.log(`⏳ Tentativa ${attempts + 1}: visível=${isVisible}, habilitado=${isEnabled}, na tela=${isOnScreen}`);
+        
+        if (isVisible && isEnabled && isOnScreen) {
+          this.log('✅ Botão está pronto para clique!');
+          break;
+        }
+      }
+      attempts++;
+      await this.delay(500);
+    }
 
-    if (startBtn && !startBtn.disabled && startBtn.offsetParent !== null) {
-      this.log('Clicando em "Iniciar caçada"');
+    // Se encontrou o botão, tenta clicar de várias formas
+    if (startBtn) {
+      this.log('✅ Clicando em "Iniciar caçada"');
+      
+      // Scroll para o botão
+      startBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      await this.delay(300);
+      
+      // Tenta clicar de forma nativa
+      try {
+        startBtn.click();
+        this.log('✅ Clique nativo executado!');
+        await this.delay(2000);
+        this._retryCount = 0;
+        this.emit('huntStarted', this.config.selectedHunt);
+        this.log('✅ Caçada iniciada!');
+        return true;
+      } catch (e) {
+        this.log(`⚠️ Clique nativo falhou: ${e.message}`);
+      }
+      
+      // Tenta clicar via evento dispatch
+      try {
+        const clickEvent = new MouseEvent('click', {
+          view: window,
+          bubbles: true,
+          cancelable: true
+        });
+        startBtn.dispatchEvent(clickEvent);
+        this.log('✅ Evento de clique dispatchado!');
+        await this.delay(2000);
+        this._retryCount = 0;
+        this.emit('huntStarted', this.config.selectedHunt);
+        this.log('✅ Caçada iniciada!');
+        return true;
+      } catch (e) {
+        this.log(`⚠️ Evento dispatch falhou: ${e.message}`);
+      }
+      
+      // Tenta clicar via safeClick (scroll + click)
       if (this.safeClick(startBtn)) {
-        await this.delay(1500);
+        this.log('✅ safeClick executado!');
+        await this.delay(2000);
         this._retryCount = 0;
         this.emit('huntStarted', this.config.selectedHunt);
         this.log('✅ Caçada iniciada!');
@@ -311,29 +378,71 @@ class HuntModule extends HunteraModule {
       }
     }
 
+    // ============================================================
+    // 🔧 FALLBACK: Tentar o botão #hunt-start-team
+    // ============================================================
+    
+    this.log('🔍 Tentando botão #hunt-start-team...');
+    let teamBtn = document.querySelector('#hunt-start-team');
     if (teamBtn && !teamBtn.disabled && teamBtn.offsetParent !== null) {
-      this.log('Clicando em "Iniciar com o time"');
-      if (this.safeClick(teamBtn)) {
-        await this.delay(1500);
+      this.log('✅ Clicando em "Iniciar com o time"');
+      teamBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      await this.delay(300);
+      try {
+        teamBtn.click();
+        await this.delay(2000);
         this._retryCount = 0;
         this.emit('huntStartedTeam', this.config.selectedHunt);
         this.log('✅ Caçada iniciada com o time!');
         return true;
+      } catch (e) {
+        this.log(`⚠️ Falha ao clicar no botão team: ${e.message}`);
       }
     }
 
-    const allBtns = document.querySelectorAll('button');
-    for (const btn of allBtns) {
+    // ============================================================
+    // 🔧 FALLBACK 2: Tentar qualquer botão com "Iniciar" na janela
+    // ============================================================
+    
+    this.log('🔍 Procurando qualquer botão com "Iniciar"...');
+    const allButtons = document.querySelectorAll('button');
+    for (const btn of allButtons) {
       const text = btn.textContent?.trim() || '';
       if (text.includes('Iniciar') && !btn.disabled && btn.offsetParent !== null) {
-        if (this.safeClick(btn)) {
-          await this.delay(1500);
-          this._retryCount = 0;
-          this.log(`✅ Caçada iniciada via: ${text}`);
-          return true;
+        const parent = btn.closest('.hunt-window, [class*="hunt"]');
+        if (parent) {
+          this.log(`✅ Botão encontrado na janela: "${text}"`);
+          btn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          await this.delay(300);
+          try {
+            btn.click();
+            await this.delay(2000);
+            this._retryCount = 0;
+            this.emit('huntStarted', this.config.selectedHunt);
+            this.log('✅ Caçada iniciada!');
+            return true;
+          } catch (e) {
+            this.log(`⚠️ Falha ao clicar em "${text}": ${e.message}`);
+          }
         }
       }
     }
+
+    // ============================================================
+    // DEBUG: Listar botões visíveis
+    // ============================================================
+    this.log('🔍 DEBUG: Botões visíveis na página:');
+    let btnCount = 0;
+    for (const btn of allButtons) {
+      if (btn.offsetParent !== null) {
+        btnCount++;
+        const text = btn.textContent?.trim() || '';
+        const id = btn.id || '';
+        const disabled = btn.disabled ? ' [DESABILITADO]' : '';
+        this.log(`  ${btnCount}. "${text}"${disabled} (id: ${id})`);
+      }
+    }
+    this.log(`📊 Total de botões visíveis: ${btnCount}`);
 
     this.log('❌ Não foi possível iniciar a caçada', 'warn');
 
