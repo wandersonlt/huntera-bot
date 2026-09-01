@@ -1,5 +1,5 @@
 // ============================================================
-// BACKGROUND.JS - VERSÃO DEFINITIVA (sem eval, sem blob)
+// BACKGROUND.JS - VERSÃO DEFINITIVA (sem inline scripts)
 // ============================================================
 
 console.log('🔧 Background service worker carregado!');
@@ -19,76 +19,37 @@ const GITHUB_CONFIG = {
 console.log(`📦 GitHub: ${GITHUB_CONFIG.rawUrl}`);
 
 // ============================================================
-// INJETAR SCRIPTS VIA SCRIPT TAGS (NÃO USA eval)
+// INJETAR SCRIPTS - USANDO ARQUIVOS LOCAIS (MAIS SEGURO)
 // ============================================================
 async function injectScripts(tabId) {
   console.log(`📦 Injetando scripts na aba ${tabId}...`);
   
   try {
-    // PRIMEIRO: injeta um script loader que vai carregar os outros via <script> tags
-    const loaderCode = `
-      (function() {
-        console.log('📦 Loader: Carregando scripts do GitHub...');
-        
-        const GITHUB_BASE = '${GITHUB_CONFIG.rawUrl}';
-        const files = [
-          'data/items.js',
-          'modules/base.js',
-          'modules/hunt.js',
-          'modules/sell.js',
-          'modules/party.js',
-          'inject.js'
-        ];
-        let loaded = 0;
-        let errors = 0;
-        
-        function loadScript(url, index) {
-          console.log(\`📥 [\${index+1}/\${files.length}] Carregando: \${url}\`);
-          const script = document.createElement('script');
-          script.src = url;
-          script.onload = function() {
-            loaded++;
-            console.log(\`✅ [\${index+1}/\${files.length}] Carregado: \${url.split('/').pop()}\`);
-            checkComplete();
-          };
-          script.onerror = function() {
-            errors++;
-            console.error(\`❌ [\${index+1}/\${files.length}] Erro ao carregar: \${url}\`);
-            checkComplete();
-          };
-          document.head.appendChild(script);
-        }
-        
-        function checkComplete() {
-          if (loaded + errors >= files.length) {
-            console.log(\`✅ Todos os scripts carregados! (\${loaded} OK, \${errors} erros)\`);
-            if (typeof window.__hunteraBot !== 'undefined') {
-              console.log('✅ Huntera Bot disponível! Use window.__hunteraBot');
-            }
-          }
-        }
-        
-        // Carrega todos os scripts
-        files.forEach((file, index) => {
-          const url = GITHUB_BASE + file;
-          loadScript(url, index);
+    // Lista de arquivos locais para injetar
+    const files = [
+      'data/items.js',
+      'modules/base.js',
+      'modules/hunt.js',
+      'modules/sell.js',
+      'modules/party.js',
+      'inject.js'
+    ];
+    
+    // Injeta cada arquivo diretamente
+    for (const file of files) {
+      console.log(`📤 Injetando: ${file}`);
+      try {
+        await chrome.scripting.executeScript({
+          target: { tabId: tabId },
+          files: [file]
         });
-      })();
-    `;
+        console.log(`✅ Injetado: ${file}`);
+      } catch (e) {
+        console.error(`❌ Erro ao injetar ${file}:`, e);
+      }
+    }
     
-    // Injeta o loader como uma função (não usa eval)
-    await chrome.scripting.executeScript({
-      target: { tabId: tabId },
-      func: (code) => {
-        const script = document.createElement('script');
-        script.textContent = code;
-        document.head.appendChild(script);
-        console.log('✅ Loader injetado!');
-      },
-      args: [loaderCode]
-    });
-    
-    console.log('✅ Loader injetado com sucesso!');
+    console.log(`✅ Todos os scripts locais injetados!`);
     return true;
     
   } catch (error) {
@@ -98,10 +59,10 @@ async function injectScripts(tabId) {
 }
 
 // ============================================================
-// INJETAR SCRIPTS LOCAIS (FALLBACK)
+// INJETAR SCRIPTS DO GITHUB (VIA download + executeScript com função)
 // ============================================================
-async function injectScriptsLocal(tabId) {
-  console.log(`📦 Injetando scripts LOCAIS na aba ${tabId}...`);
+async function injectScriptsFromGitHub(tabId) {
+  console.log(`📦 Injetando scripts do GitHub na aba ${tabId}...`);
   
   try {
     const files = [
@@ -113,19 +74,50 @@ async function injectScriptsLocal(tabId) {
       'inject.js'
     ];
     
+    // Baixa os scripts do GitHub
+    const scripts = [];
     for (const file of files) {
+      const url = GITHUB_CONFIG.rawUrl + file;
+      console.log(`📥 Baixando: ${url}`);
+      try {
+        const response = await fetch(url);
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+        const code = await response.text();
+        scripts.push({ file, code });
+        console.log(`✅ Baixado: ${file} (${code.length} bytes)`);
+      } catch (e) {
+        console.error(`❌ Erro ao baixar ${file}:`, e);
+      }
+    }
+    
+    if (scripts.length === 0) {
+      console.error('❌ Nenhum script baixado!');
+      return false;
+    }
+    
+    // Injeta cada script usando executeScript com função
+    for (const { file, code } of scripts) {
       console.log(`📤 Injetando: ${file}`);
       await chrome.scripting.executeScript({
         target: { tabId: tabId },
-        files: [file]
+        func: (codeToExecute) => {
+          // Cria um script element com o código
+          const script = document.createElement('script');
+          script.textContent = codeToExecute;
+          document.head.appendChild(script);
+          console.log(`✅ Script injetado: ${file}`);
+        },
+        args: [code]
       });
     }
     
-    console.log(`✅ ${files.length} scripts locais injetados!`);
+    console.log(`✅ ${scripts.length} scripts do GitHub injetados!`);
     return true;
     
   } catch (error) {
-    console.error('❌ Erro ao injetar scripts locais:', error);
+    console.error('❌ Erro ao injetar scripts do GitHub:', error);
     return false;
   }
 }
@@ -136,12 +128,8 @@ async function injectScriptsLocal(tabId) {
 chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   if (changeInfo.status === 'complete' && tab.url?.includes('huntera.com.br/game')) {
     console.log('🎯 Página do jogo detectada!');
-    // Tenta carregar do GitHub primeiro
-    const result = await injectScripts(tabId);
-    if (!result) {
-      console.log('⚠️ Falha no GitHub, usando fallback local...');
-      await injectScriptsLocal(tabId);
-    }
+    // Usa scripts locais (mais confiável)
+    await injectScripts(tabId);
   }
 });
 
@@ -150,10 +138,7 @@ chrome.tabs.query({ url: 'https://huntera.com.br/game' }, async (tabs) => {
   if (tabs.length > 0) {
     console.log(`🎯 ${tabs.length} aba(s) do jogo encontrada(s)!`);
     for (const tab of tabs) {
-      const result = await injectScripts(tab.id);
-      if (!result) {
-        await injectScriptsLocal(tab.id);
-      }
+      await injectScripts(tab.id);
     }
   }
 });
@@ -186,15 +171,7 @@ async function reloadAllScripts() {
   
   for (const tab of tabs) {
     console.log(`🔄 Recarregando scripts na aba ${tab.id}...`);
-    // Primeiro tenta GitHub
-    let result = await injectScripts(tab.id);
-    if (!result) {
-      // Fallback local
-      result = await injectScriptsLocal(tab.id);
-    }
-    if (!result) {
-      console.error(`❌ Falha ao recarregar scripts na aba ${tab.id}`);
-    }
+    await injectScripts(tab.id);
   }
   return true;
 }
@@ -236,12 +213,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     case 'setBlockedItems':
     case 'forceSell':
     case 'startHunt':
-      // Encaminha para o content script
       chrome.tabs.query({ url: 'https://huntera.com.br/game' }, (tabs) => {
         if (tabs.length > 0) {
           chrome.tabs.sendMessage(tabs[0].id, message);
-        } else {
-          console.warn('⚠️ Nenhuma aba do jogo encontrada');
         }
       });
       sendResponse({ success: true });
