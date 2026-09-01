@@ -145,7 +145,20 @@
   </div>
 
   <!-- Tab: Party -->
+    <!-- Tab: Party - Atualizar -->
   <div class="tab-content" id="tab-party">
+    <div class="form-group">
+      <label>Modo Party (afeta a hunt)</label>
+      <select id="partyModeSelect">
+        <option value="solo">Solo (inicia hunt)</option>
+        <option value="leader">Líder (inicia hunt)</option>
+        <option value="member">Membro (NÃO inicia hunt)</option>
+      </select>
+      <small style="color:#8b949e;font-size:11px;display:block;margin-top:4px;">
+        ⚠️ Membro: aguarda o líder iniciar a caçada
+      </small>
+    </div>
+    
     <div class="checkbox-group">
       <input type="checkbox" id="acceptInvite" checked>
       <label for="acceptInvite">Aceitar convite de party</label>

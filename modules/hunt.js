@@ -528,10 +528,13 @@ class HuntModule extends HunteraModule {
     return false;
   }
 
+// modules/hunt.js - Substitua a função loop()
+
   async loop() {
     if (!this.isRunning()) return;
 
     try {
+      // Se já está em uma caçada, não faz nada
       if (this.isInHunt()) {
         if (this._huntFound) {
           this._huntFound = false;
@@ -541,24 +544,37 @@ class HuntModule extends HunteraModule {
         return;
       }
 
+      // ============================================================
+      // 🔧 CORREÇÃO: Se for MEMBRO, NÃO inicia a hunt
+      // ============================================================
+      if (this.config.partyMode === 'member') {
+        this.log('👥 Modo Membro: aguardando líder iniciar a caçada...');
+        await this.delay(5000);
+        return;
+      }
+
+      // Se está na cidade e autoStart está ativo (apenas SOLO ou LÍDER)
       if (this.isInCity() && this.config.autoStart && this.config.selectedHunt) {
-        if (this._huntFound) {
-          this.log('⏳ Caçada já encontrada, aguardando...');
-          await this.delay(5000);
-          return;
-        }
-        
-        this.log('🏙️ Na cidade, retornando para caçada...');
-        const result = await this.startHunt();
-        
-        if (result) {
-          this._huntFound = true;
-          this.log('✅ Caçada iniciada, parando busca...');
-          await this.delay(2000);
-        } else {
-          this._huntFound = false;
-          this.log('⚠️ Falha ao iniciar, tentando novamente...');
-          await this.delay(3000);
+        // Modo Líder ou Solo podem iniciar
+        if (this.config.partyMode === 'leader' || this.config.partyMode === 'solo') {
+          if (this._huntFound) {
+            this.log('⏳ Caçada já encontrada, aguardando...');
+            await this.delay(5000);
+            return;
+          }
+          
+          this.log(`🏙️ [${this.config.partyMode === 'leader' ? 'Líder' : 'Solo'}] Na cidade, retornando para caçada...`);
+          const result = await this.startHunt();
+          
+          if (result) {
+            this._huntFound = true;
+            this.log('✅ Caçada iniciada, parando busca...');
+            await this.delay(2000);
+          } else {
+            this._huntFound = false;
+            this.log('⚠️ Falha ao iniciar, tentando novamente...');
+            await this.delay(3000);
+          }
         }
       } else {
         this._huntFound = false;
