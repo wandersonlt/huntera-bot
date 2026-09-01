@@ -1,9 +1,28 @@
 // content.js
 console.log('🔌 Content script carregado!');
 
-// Escuta mensagens do background
+// ============================================================
+// VERIFICAR SE O INJECT JÁ FOI CARREGADO
+// ============================================================
+if (!window.__hunteraBotLoaded) {
+  window.__hunteraBotLoaded = true;
+  
+  // Injeta o script principal
+  const script = document.createElement('script');
+  script.src = chrome.runtime.getURL('inject.js');
+  script.onload = () => {
+    console.log('✅ Inject script carregado via content!');
+  };
+  document.documentElement.appendChild(script);
+} else {
+  console.log('⏭️ Inject script já carregado, ignorando...');
+}
+
+// ============================================================
+// ESCUTA MENSAGENS DO BACKGROUND
+// ============================================================
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  console.log('📨 Content recebeu:', message);
+  console.log('📨 Content recebeu do background:', message);
   
   window.postMessage({
     source: 'huntera-bot-extension',
@@ -15,7 +34,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   return true;
 });
 
-// Escuta mensagens do inject
+// ============================================================
+// ESCUTA MENSAGENS DO INJECT
+// ============================================================
 window.addEventListener('message', (event) => {
   if (event.data.source === 'huntera-bot-inject') {
     console.log('📤 Content enviando para background:', event.data);
@@ -27,11 +48,5 @@ window.addEventListener('message', (event) => {
     });
   }
 });
-
-// Injeta o script principal
-const script = document.createElement('script');
-script.src = chrome.runtime.getURL('inject.js');
-script.onload = () => script.remove();
-document.documentElement.appendChild(script);
 
 console.log('✅ Content script pronto!');
