@@ -10,22 +10,10 @@ if (window.__hunteraInjectLoaded) {
   window.__hunteraInjectLoaded = true;
   
   // ============================================================
-  // EXPORTA AS CLASSES GLOBALMENTE (se não existirem)
-  // ============================================================
-  // As classes já estão definidas nos arquivos carregados
-  // Só precisamos garantir que estão no window
-  
-  console.log('📦 Verificando classes disponíveis:');
-  console.log('  HuntModule:', typeof window.HuntModule);
-  console.log('  SellModule:', typeof window.SellModule);
-  console.log('  PartyModule:', typeof window.PartyModule);
-  console.log('  ALL_ITEMS:', window.ALL_ITEMS?.length || 0);
-  
-  // ============================================================
   // ESTADO DO BOT
   // ============================================================
   let isRunning = false;
-
+  
   // ============================================================
   // FUNÇÕES DE COMUNICAÇÃO
   // ============================================================
@@ -147,38 +135,51 @@ if (window.__hunteraInjectLoaded) {
   }
 
   // ============================================================
-  // INICIALIZAR MÓDULOS
+  // INICIALIZAR MÓDULOS (com verificação e retry)
   // ============================================================
   function initModules() {
     console.log('🔧 Inicializando módulos...');
     
-    // Verifica se as classes existem no window
-    if (typeof window.HuntModule !== 'undefined') {
-      console.log('✅ HuntModule encontrado, criando instância...');
+    // Verifica se as classes existem
+    const hasHunt = typeof window.HuntModule !== 'undefined';
+    const hasSell = typeof window.SellModule !== 'undefined';
+    const hasParty = typeof window.PartyModule !== 'undefined';
+    const hasItems = window.ALL_ITEMS && window.ALL_ITEMS.length > 0;
+    
+    console.log('📦 Classes disponíveis:');
+    console.log('  HuntModule:', hasHunt ? '✅' : '❌');
+    console.log('  SellModule:', hasSell ? '✅' : '❌');
+    console.log('  PartyModule:', hasParty ? '✅' : '❌');
+    console.log('  ALL_ITEMS:', hasItems ? `${window.ALL_ITEMS.length} itens` : '❌');
+    
+    // Se os módulos não estiverem disponíveis, tenta novamente depois
+    if (!hasHunt || !hasSell || !hasParty || !hasItems) {
+      console.log('⏳ Aguardando scripts carregarem... tentando novamente em 2s');
+      setTimeout(initModules, 2000);
+      return;
+    }
+    
+    // Inicializa os módulos
+    if (hasHunt) {
       window.huntModule = new window.HuntModule();
       window.huntModule.init();
-    } else {
-      console.error('❌ HuntModule não encontrado!');
+      console.log('✅ HuntModule inicializado');
     }
     
-    if (typeof window.SellModule !== 'undefined') {
-      console.log('✅ SellModule encontrado, criando instância...');
+    if (hasSell) {
       window.sellModule = new window.SellModule();
       window.sellModule.init();
-    } else {
-      console.error('❌ SellModule não encontrado!');
+      console.log('✅ SellModule inicializado');
     }
     
-    if (typeof window.PartyModule !== 'undefined') {
-      console.log('✅ PartyModule encontrado, criando instância...');
+    if (hasParty) {
       window.partyModule = new window.PartyModule();
       window.partyModule.init();
-    } else {
-      console.error('❌ PartyModule não encontrado!');
+      console.log('✅ PartyModule inicializado');
     }
     
     console.log('✅ Módulos inicializados!');
-    console.log('📦 Instâncias criadas:');
+    console.log('📦 Instâncias:');
     console.log('  huntModule:', typeof window.huntModule);
     console.log('  sellModule:', typeof window.sellModule);
     console.log('  partyModule:', typeof window.partyModule);
@@ -189,12 +190,12 @@ if (window.__hunteraInjectLoaded) {
   // ============================================================
   window.__hunteraBot = {
     start: () => { 
-      console.log('▶️ Iniciando bot via debug...');
+      console.log('▶️ Iniciando bot...');
       isRunning = true; 
       startLoop(); 
     },
     stop: () => { 
-      console.log('⏹️ Parando bot via debug...');
+      console.log('⏹️ Parando bot...');
       isRunning = false; 
     },
     status: getStatus,
@@ -208,7 +209,7 @@ if (window.__hunteraInjectLoaded) {
     SellModule: window.SellModule,
     PartyModule: window.PartyModule,
     ALL_ITEMS: window.ALL_ITEMS,
-    searchItems: window.searchItems || function(query) {
+    searchItems: function(query) {
       if (!query || query.length < 2) return [];
       const q = query.toLowerCase();
       return (window.ALL_ITEMS || []).filter(item => item.toLowerCase().includes(q));
@@ -216,21 +217,15 @@ if (window.__hunteraInjectLoaded) {
   };
 
   console.log('✅ Inject script pronto! Use window.__hunteraBot para debug.');
-  console.log('📦 Métodos disponíveis:');
+  console.log('📦 Comandos disponíveis:');
   console.log('  window.__hunteraBot.start() - Iniciar bot');
   console.log('  window.__hunteraBot.stop() - Parar bot');
   console.log('  window.__hunteraBot.status() - Ver status');
   console.log('  window.__hunteraBot.searchItems("termo") - Buscar itens');
 
   // ============================================================
-  // INICIALIZAR QUANDO A PÁGINA CARREGAR
+  // AGUARDAR SCRIPTS E INICIALIZAR
   // ============================================================
-  if (document.readyState === 'complete') {
-    // Aguarda um pouco para garantir que os scripts foram carregados
-    setTimeout(initModules, 500);
-  } else {
-    window.addEventListener('load', () => {
-      setTimeout(initModules, 500);
-    });
-  }
+  // Aguarda 1 segundo para os scripts serem carregados
+  setTimeout(initModules, 1500);
 }
